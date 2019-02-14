@@ -93,14 +93,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChristWare.cs" />
-    <Compile Include="ChristConfiguration.cs" />
-    <Compile Include="Offsets.cs" />
+    <Compile Include="Core\ChristWare.cs" />
+    <Compile Include="Core\ChristConfiguration.cs" />
+    <Compile Include="Core\Component.cs" />
+    <Compile Include="Core\Components\ESP.cs" />
+    <Compile Include="Core\Constants.cs" />
+    <Compile Include="Core\Offsets.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\Beeper.cs" />
     <Compile Include="Utilities\Clicker.cs" />
     <Compile Include="Utilities\Memory.cs" />
     <Compile Include="Utilities\ProcessUtility.cs" />
+    <Compile Include="Utilities\WindowUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -119,5 +124,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
