@@ -42,9 +42,10 @@ namespace ChristWare
 
             Console.WriteLine("Client module @ " + clientAddress);
 
-            this.components = new List<Component>();
+            components = new List<Component>();
 
             components.Add(new ESP(processHandle, clientAddress, configuration));
+            components.Add(new Radar(processHandle, clientAddress, configuration));
         }
 
         public void Run()
@@ -71,9 +72,7 @@ namespace ChristWare
                     }
 
                     if (component.Enabled)
-                    {
                         component.OnTick();
-                    }
                 }
 
                 Thread.Sleep(5);

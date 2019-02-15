@@ -97,6 +97,7 @@
     <Compile Include="Core\ChristConfiguration.cs" />
     <Compile Include="Core\Component.cs" />
     <Compile Include="Core\Components\ESP.cs" />
+    <Compile Include="Core\Components\Radar.cs" />
     <Compile Include="Core\Constants.cs" />
     <Compile Include="Core\Offsets.cs" />
     <Compile Include="Program.cs" />

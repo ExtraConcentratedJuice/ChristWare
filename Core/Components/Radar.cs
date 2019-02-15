@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace ChristWare.Core.Components
 {
-    public class ESP : Component
+    public class Radar : Component
     {
-        public override string Name => "ESP";
-        public override char Hotkey => 'p';
+        public override string Name => "Radar";
+        public override char Hotkey => 'o';
 
-        public ESP(IntPtr processHandle, IntPtr clientAddress, ChristConfiguration configuration) 
+        public Radar(IntPtr processHandle, IntPtr clientAddress, ChristConfiguration configuration)
             : base(processHandle, clientAddress, configuration)
         {
         }
@@ -30,7 +30,6 @@ namespace ChristWare.Core.Components
 
         public override void OnTick()
         {
-            var manager = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwGlowObjectManager);
             var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
             var teamId = Memory.Read<int>(processHandle, localPlayer + Netvars.m_iTeamNum);
 
@@ -45,18 +44,10 @@ namespace ChristWare.Core.Components
                     if (health <= 0)
                         continue;
 
-                    var glow = Memory.Read<int>(processHandle, entity + Netvars.m_iGlowIndex);
                     var entityTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
 
-                    var r = entityTeamId != teamId ? configuration.EnemyR : configuration.FriendlyR;
-                    var g = entityTeamId != teamId ? configuration.EnemyG : configuration.FriendlyG;
-                    var b = entityTeamId != teamId ? configuration.EnemyB : configuration.FriendlyB;
-
-                    Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x4, r / 255F); // R
-                    Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x8, g / 255F); // G
-                    Memory.Write<float>(processHandle, manager + glow * 0x38 + 0xC, b / 255F); // B
-                    Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x10, 1F); // Alpha
-                    Memory.Write<int>(processHandle, manager + glow * 0x38 + 0x24, 1); // Toggle
+                    if (entityTeamId != teamId)
+                        Memory.Write<int>(processHandle, entity + Netvars.m_bSpotted, 1);
                 }
             }
         }
