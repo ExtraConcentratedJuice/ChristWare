@@ -28,40 +28,50 @@ namespace ChristWare
         private readonly List<Component> components;
         private short? pressedKey;
 
-        public ChristWare(string processName)
+        public ChristWare(string processName, ChristConfiguration configuration)
         {
             if (!ProcessUtility.TryGetProcessHandle("csgo", out processHandle))
                 throw new ArgumentException("No CSGO process found.");
 
-            Console.WriteLine("Acquired process handle @ " + processHandle);
+            Console.WriteLine("Process Handle: " + processHandle);
 
             if (!ProcessUtility.TryGetProcessModule("csgo", "client_panorama.dll", out clientAddress))
                 throw new ArgumentException("No CSGO client panorama module found.");
 
-            configuration = JsonConvert.DeserializeObject<ChristConfiguration>(File.ReadAllText("christconfig.json"));
+            this.configuration = configuration;
 
-            Console.WriteLine("Client module @ " + clientAddress);
+            Console.WriteLine($"Client Module: 0x{clientAddress.ToString("x")}");
+
+            ConsoleUtility.WriteLineColor($"{ASCII_ART}\n", ConsoleColor.Yellow, false);
+
+            Console.CursorVisible = false;
 
             components = new List<Component>();
 
             components.Add(new ESP(processHandle, clientAddress, configuration));
             components.Add(new Radar(processHandle, clientAddress, configuration));
+            components.Add(new TriggerBot(processHandle, clientAddress, configuration));
         }
 
         public void Run()
         {
             while (true)
             {
+                Console.SetCursorPosition(0, 10);
+
                 if (pressedKey.HasValue && GetAsyncKeyState(pressedKey.Value) == 0)
                     pressedKey = null;
 
                 foreach (var component in components)
                 {
+                    ConsoleUtility.WriteColor($"{component.Name} ({component.Hotkey}): ");
+                    ConsoleUtility.WriteLineColor(component.Enabled ? "Enabled" : "Disabled", component.Enabled ? ConsoleColor.Green : ConsoleColor.Red);
                     var currentlyPressedKey = VkKeyScanA(component.Hotkey) & 0x00FF;
 
                     if (!pressedKey.HasValue
                         && WindowUtility.GetActiveWindowName() == Constants.CSGO_WINDOW 
-                        && GetAsyncKeyState(currentlyPressedKey) != 0)
+                        && GetAsyncKeyState(currentlyPressedKey) != 0
+                        && (Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwMouseEnable) ^ (int)clientAddress + Signatures.dwMouseEnablePtr) != 0)
                     {
                         pressedKey = (short?)currentlyPressedKey;
 
@@ -71,12 +81,33 @@ namespace ChristWare
                             component.Enable();
                     }
 
-                    if (component.Enabled)
-                        component.OnTick();
+                    if (component.Enabled && component is ITickHandler handler)
+                        handler.OnTick();
                 }
 
+                for (int i = 1; i <= 32; i++)
+                {
+                    var entity = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwEntityList + i * 0x10);
+
+                    if (entity != 0)
+                    {
+                        foreach (var component in components.Where(x => x.Enabled).OfType<IEntityHandler>())
+                        {
+                            component.HandleEntity(entity);
+                        }
+                    }
+                }
+                
                 Thread.Sleep(5);
             }
         }
+        private const string ASCII_ART = @"
+   _____ _          _     ___          __            
+  / ____| |        (_)   | \ \        / /             
+ | |    | |__  _ __ _ ___| |\ \  /\  / /_ _ _ __ ___ 
+ | |    | '_ \| '__| / __| __\ \/  \/ / _` | '__/ _ \
+ | |____| | | | |  | \__ \ |_ \  /\  / (_| | | |  __/
+  \_____|_| |_|_|  |_|___/\__| \/  \/ \__,_|_|  \___|
+";
     }
 }

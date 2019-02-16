@@ -17,7 +17,6 @@ namespace ChristWare.Core
 
         public bool Enabled { get; protected set; }
 
-        public abstract void OnTick();
         protected abstract void OnDisable();
         protected abstract void OnEnable();
 

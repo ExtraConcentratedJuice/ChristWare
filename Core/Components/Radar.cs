@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ChristWare.Core.Components
 {
-    public class Radar : Component
+    public class Radar : Component, IEntityHandler
     {
         public override string Name => "Radar";
         public override char Hotkey => 'o';
@@ -28,28 +28,20 @@ namespace ChristWare.Core.Components
             Beeper.Beep(783, 215);
         }
 
-        public override void OnTick()
+        public void HandleEntity(int entity)
         {
             var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
             var teamId = Memory.Read<int>(processHandle, localPlayer + Netvars.m_iTeamNum);
 
-            for (int i = 1; i <= 32; i++)
-            {
-                var entity = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwEntityList + i * 0x10);
+            var health = Memory.Read<int>(processHandle, entity + Netvars.m_iHealth);
 
-                if (entity != 0)
-                {
-                    var health = Memory.Read<int>(processHandle, entity + Netvars.m_iHealth);
+            if (health <= 0)
+                return ;
 
-                    if (health <= 0)
-                        continue;
+            var entityTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
 
-                    var entityTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
-
-                    if (entityTeamId != teamId)
-                        Memory.Write<int>(processHandle, entity + Netvars.m_bSpotted, 1);
-                }
-            }
+            if (entityTeamId != teamId)
+                Memory.Write<int>(processHandle, entity + Netvars.m_bSpotted, 1);
         }
     }
 }

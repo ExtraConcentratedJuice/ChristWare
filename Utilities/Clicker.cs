@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ChristWare.Utilities
@@ -34,8 +35,18 @@ namespace ChristWare.Utilities
             }
         }
 
-        public static void TriggerLeftClick() => Click(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP);
-        public static void TriggerRightClick() => Click(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTDOWN);
+        public static void TriggerLeftClick(int delay)
+        {
+            Click(MOUSEEVENTF_LEFTDOWN);
+            Thread.Sleep(delay);
+            Click(MOUSEEVENTF_LEFTUP);
+        }
+        public static void TriggerRightClick(int delay)
+        {
+            Click(MOUSEEVENTF_RIGHTDOWN);
+            Thread.Sleep(delay);
+            Click(MOUSEEVENTF_RIGHTUP);
+        }
 
         private static void Click(uint flags)
         {
@@ -48,7 +59,7 @@ namespace ChristWare.Utilities
                 y = pos.Y;
             }
 
-            mouse_event(flags, (uint)x, (uint)y, 0, 0);
+            mouse_event(flags, 0, 0, 0, 0);
         }
     }
 }
