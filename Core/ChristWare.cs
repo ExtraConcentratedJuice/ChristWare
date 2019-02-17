@@ -62,6 +62,12 @@ namespace ChristWare
         {
             while (true)
             {
+                if (!WindowUtility.IsHandleWindow(windowHandle))
+                {
+                    ExitSequence();
+                    Environment.Exit(0);
+                }
+
                 Console.SetCursorPosition(0, 10);
 
                 if (pressedKey.HasValue && !KeyUtility.IsKeyDown(pressedKey.Value))
@@ -106,6 +112,15 @@ namespace ChristWare
                 Thread.Sleep(5);
             }
         }
+
+        public static void ExitSequence()
+        {
+            Console.Beep(1760, 235);
+            Console.Beep(1319, 235);
+            Console.Beep(440, 235);
+            Console.Beep(494, 235 * 2);
+        }
+
         private const string ASCII_ART = @"
    _____ _          _     ___          __            
   / ____| |        (_)   | \ \        / /             

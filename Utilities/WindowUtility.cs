@@ -27,6 +27,10 @@ namespace ChristWare.Utilities
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool GetWindowRect(IntPtr hwnd, out Rectangle lpRect);
 
+        [DllImport("user32.dll")]
+        static extern bool IsWindow(IntPtr hWnd);
+
+        public static bool IsHandleWindow(IntPtr handle) => IsWindow(handle);
         public static string GetActiveWindowName()
         {
             var buffer = new StringBuilder(256);
