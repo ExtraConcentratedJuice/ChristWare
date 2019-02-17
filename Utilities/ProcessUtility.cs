@@ -17,30 +17,28 @@ namespace ChristWare.Utilities
         public const int PROCESS_VM_WRITE = 0x0020;
         public const int PROCESS_VM_OPERATION = 0x0008;
 
-        public static bool TryGetProcessHandle(string name, out IntPtr handle)
+        public static bool TryGetProcessHandle(string name, out Process process, out IntPtr handle)
         {
             handle = default;
 
-            var proc = Process.GetProcessesByName(name).FirstOrDefault();
+            process = Process.GetProcessesByName(name).FirstOrDefault();
 
-            if (proc == null)
+            if (process == null)
                 return false;
 
-            handle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE, false, proc.Id);
+            handle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE, false, process.Id);
 
             return true;
         }
 
-        public static bool TryGetProcessModule(string procName, string moduleName, out IntPtr address)
+        public static bool TryGetProcessModule(Process process, string moduleName, out IntPtr address)
         {
+            if (process == null)
+                throw new ArgumentNullException(nameof(process));
+
             address = default;
 
-            var proc = Process.GetProcessesByName(procName).FirstOrDefault();
-
-            if (proc == null)
-                return false;
-
-            foreach (var x in proc.Modules.OfType<ProcessModule>())
+            foreach (var x in process.Modules.OfType<ProcessModule>())
             {
                 if (x.ModuleName == moduleName)
                 {

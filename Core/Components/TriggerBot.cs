@@ -12,9 +12,6 @@ namespace ChristWare.Core.Components
 {
     public class TriggerBot : Component, ITickHandler
     {
-        [DllImport("user32.dll")]
-        public static extern short GetAsyncKeyState(int vKey);
-
         public override string Name => "TriggerBot";
         public override char Hotkey => 'i';
 
@@ -23,13 +20,13 @@ namespace ChristWare.Core.Components
         public TriggerBot(IntPtr processHandle, IntPtr clientAddress, ChristConfiguration configuration)
             : base(processHandle, clientAddress, configuration)
         {
-            new Thread(Fire).Start();
+            new Thread(CheckFire).Start();
         }
 
         public void OnTick()
         {
-            // Keycode for 'e'
-            if (GetAsyncKeyState(0x45) == 0)
+            // Keycode for back mouse button
+            if (!KeyUtility.IsKeyDown(0x05))
                 return;
 
             var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
@@ -50,7 +47,7 @@ namespace ChristWare.Core.Components
             }
         }
 
-        private void Fire()
+        private void CheckFire()
         {
             while (true)
             {

@@ -24,18 +24,21 @@ namespace ChristWare
 
         private readonly IntPtr processHandle;
         private readonly IntPtr clientAddress;
+        private readonly IntPtr windowHandle;
         private readonly ChristConfiguration configuration;
         private readonly List<Component> components;
         private short? pressedKey;
 
         public ChristWare(string processName, ChristConfiguration configuration)
         {
-            if (!ProcessUtility.TryGetProcessHandle("csgo", out processHandle))
+            if (!ProcessUtility.TryGetProcessHandle("csgo", out var process, out processHandle))
                 throw new ArgumentException("No CSGO process found.");
+
+            this.windowHandle = process.MainWindowHandle;
 
             Console.WriteLine("Process Handle: " + processHandle);
 
-            if (!ProcessUtility.TryGetProcessModule("csgo", "client_panorama.dll", out clientAddress))
+            if (!ProcessUtility.TryGetProcessModule(process, "client_panorama.dll", out clientAddress))
                 throw new ArgumentException("No CSGO client panorama module found.");
 
             this.configuration = configuration;
@@ -51,7 +54,9 @@ namespace ChristWare
             components.Add(new ESP(processHandle, clientAddress, configuration));
             components.Add(new Radar(processHandle, clientAddress, configuration));
             components.Add(new TriggerBot(processHandle, clientAddress, configuration));
+            components.Add(new BunnyHop(processHandle, clientAddress, configuration));
         }
+
 
         public void Run()
         {
@@ -59,7 +64,7 @@ namespace ChristWare
             {
                 Console.SetCursorPosition(0, 10);
 
-                if (pressedKey.HasValue && GetAsyncKeyState(pressedKey.Value) == 0)
+                if (pressedKey.HasValue && !KeyUtility.IsKeyDown(pressedKey.Value))
                     pressedKey = null;
 
                 foreach (var component in components)
@@ -69,8 +74,8 @@ namespace ChristWare
                     var currentlyPressedKey = VkKeyScanA(component.Hotkey) & 0x00FF;
 
                     if (!pressedKey.HasValue
-                        && WindowUtility.GetActiveWindowName() == Constants.CSGO_WINDOW 
-                        && GetAsyncKeyState(currentlyPressedKey) != 0
+                        && WindowUtility.GetForegroundWindow() == windowHandle
+                        && KeyUtility.IsKeyDown(currentlyPressedKey)
                         && (Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwMouseEnable) ^ (int)clientAddress + Signatures.dwMouseEnablePtr) != 0)
                     {
                         pressedKey = (short?)currentlyPressedKey;

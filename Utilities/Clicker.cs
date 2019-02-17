@@ -13,27 +13,10 @@ namespace ChristWare.Utilities
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
         public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool GetCursorPos(out MousePoint lpMousePoint);
-
         private const int MOUSEEVENTF_LEFTDOWN = 0x02;
         private const int MOUSEEVENTF_LEFTUP = 0x04;
         private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
         private const int MOUSEEVENTF_RIGHTUP = 0x10;
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct MousePoint
-        {
-            public int X;
-            public int Y;
-
-            public MousePoint(int x, int y)
-            {
-                X = x;
-                Y = y;
-            }
-        }
 
         public static void TriggerLeftClick(int delay)
         {
@@ -48,18 +31,6 @@ namespace ChristWare.Utilities
             Click(MOUSEEVENTF_RIGHTUP);
         }
 
-        private static void Click(uint flags)
-        {
-            var x = 0;
-            var y = 0;
-
-            if (GetCursorPos(out var pos))
-            {
-                x = pos.X;
-                y = pos.Y;
-            }
-
-            mouse_event(flags, 0, 0, 0, 0);
-        }
+        private static void Click(uint flags) => mouse_event(flags, 0, 0, 0, 0);
     }
 }
