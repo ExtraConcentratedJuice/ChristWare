@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using ChristWare.Core;
+using ChristWare.Utilities;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,7 +31,7 @@ namespace ChristWare
             handler += OnClose;
             SetConsoleCtrlHandler(handler, true);
 
-            var configuration = JsonConvert.DeserializeObject<ChristConfiguration>(File.ReadAllText("christconfig.json"));
+            var configuration = new ConfigurationManager<ChristConfiguration>("christconfig.json");
             new ChristWare("csgo", configuration).Run();
         }
     }

@@ -10,10 +10,13 @@ namespace ChristWare.Core
     {
         protected readonly IntPtr processHandle;
         protected readonly IntPtr clientAddress;
+        protected readonly IntPtr engineAddress;
+
         protected readonly ChristConfiguration configuration;
 
         public abstract string Name { get; }
-        public abstract char Hotkey { get; }
+        public abstract HotKey DefaultHotkey { get; }
+        public HotKey Hotkey { get; }
 
         public bool Enabled { get; protected set; }
 
@@ -32,11 +35,22 @@ namespace ChristWare.Core
             OnEnable();
         }
 
-        public Component(IntPtr processHandle, IntPtr clientAddress, ChristConfiguration configuration)
+        public Component(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ChristConfiguration configuration)
         {
             this.processHandle = processHandle;
             this.clientAddress = clientAddress;
+            this.engineAddress = engineAddress;
             this.configuration = configuration;
+
+            if (!configuration.KeyBinds.TryGetValue(Name, out var unparsed))
+            {
+                configuration.KeyBinds[Name] = DefaultHotkey.ToString();
+                Hotkey = DefaultHotkey;
+            }
+            else
+            {
+                Hotkey = new HotKey(unparsed);
+            }
         }
     }
 }

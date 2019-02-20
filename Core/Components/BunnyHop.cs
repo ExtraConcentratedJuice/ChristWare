@@ -11,22 +11,23 @@ namespace ChristWare.Core.Components
     public class BunnyHop : Component, ITickHandler
     {
         public override string Name => "BunnyHop";
-        public override char Hotkey => 'n';
+        public override HotKey DefaultHotkey => new HotKey('n');
+        private readonly HotKey bunnyHopHoldKey;
 
         private volatile bool jumping;
 
         private const int FL_ONGROUND = (1 << 0);
 
-        public BunnyHop(IntPtr processHandle, IntPtr clientAddress, ChristConfiguration configuration)
-            : base(processHandle, clientAddress, configuration)
+        public BunnyHop(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ChristConfiguration configuration)
+            : base(processHandle, clientAddress, engineAddress, configuration)
         {
+            bunnyHopHoldKey = new HotKey(configuration.BunnyHopHoldKey);
             new Thread(CheckJump).Start();
         }
 
         public void OnTick()
         {
-            // Middle mouse button = 0x06
-            if (jumping || !KeyUtility.IsKeyDown(0x04))
+            if (!KeyUtility.IsKeyDown(bunnyHopHoldKey.Value) || jumping)
                 return;
 
             var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
@@ -44,11 +45,11 @@ namespace ChristWare.Core.Components
             {
                 if (jumping)
                 {
-                    jumping = false;
-
                     Memory.Write<int>(processHandle, jumpAdr, 5);
                     Thread.Sleep(ThreadSafeRandom.Next(12, 20));
                     Memory.Write<int>(processHandle, jumpAdr, 4);
+
+                    jumping = false;
                 }
 
                 Thread.Sleep(2);

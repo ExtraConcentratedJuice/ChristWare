@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChristWare.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -36,6 +37,45 @@ namespace ChristWare.Utilities
             to.Y = y;
 
             return true;
+        }
+
+        public static Vector3 AngleToDirection(this Vector3 angle)
+        {
+            var x = angle.X * (Math.PI / 180F);
+            var y = angle.Y * (Math.PI / 180F);
+
+            var sinYaw = (float)Math.Sin(y);
+            var cosYaw = (float)Math.Cos(y);
+
+            var sinPitch = (float)Math.Sin(x);
+            var cosPitch = (float)Math.Cos(x);
+
+            return new Vector3(cosPitch * cosYaw, cosPitch * sinYaw, -sinPitch);
+        }
+
+        public static Vector3 ClampAngle(Vector3 angle)
+        {
+            Vector3 ret = new Vector3
+            {
+                Z = 0
+            };
+
+            if (angle.X > 89.0f && angle.X<= 180.0f)
+                ret.X = 88.0f;
+
+            if (angle.X > 180.0f)
+                ret.X = angle.X - 360.0f;
+
+            if (angle.X < -89.0f)
+                ret.X = -88.0f;
+
+            if (angle.Y > 180.0f)
+                ret.Y = angle.Y - 360.0f;
+
+            if (angle.Y < -180.0f)
+                ret.Y = angle.Y + 360.0f;
+
+            return ret;
         }
     }
 }

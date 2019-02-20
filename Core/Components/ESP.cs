@@ -10,10 +10,10 @@ namespace ChristWare.Core.Components
     public class ESP : Component, IEntityHandler
     {
         public override string Name => "ESP";
-        public override char Hotkey => 'p';
+        public override HotKey DefaultHotkey => new HotKey('p');
 
-        public ESP(IntPtr processHandle, IntPtr clientAddress, ChristConfiguration configuration) 
-            : base(processHandle, clientAddress, configuration)
+        public ESP(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ChristConfiguration configuration) 
+            : base(processHandle, clientAddress, engineAddress, configuration)
         {
         }
 

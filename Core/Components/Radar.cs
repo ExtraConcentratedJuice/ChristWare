@@ -10,10 +10,10 @@ namespace ChristWare.Core.Components
     public class Radar : Component, IEntityHandler
     {
         public override string Name => "Radar";
-        public override char Hotkey => 'o';
+        public override HotKey DefaultHotkey => new HotKey('o');
 
-        public Radar(IntPtr processHandle, IntPtr clientAddress, ChristConfiguration configuration)
-            : base(processHandle, clientAddress, configuration)
+        public Radar(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ChristConfiguration configuration)
+            : base(processHandle, clientAddress, engineAddress, configuration)
         {
         }
 

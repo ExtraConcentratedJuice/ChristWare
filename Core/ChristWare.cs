@@ -19,45 +19,62 @@ namespace ChristWare
         [DllImport("user32.dll")]
         public static extern short GetAsyncKeyState(int vKey);
 
-        [DllImport("user32.dll")]
-        public static extern short VkKeyScanA(char ch);
-
         private readonly IntPtr processHandle;
         private readonly IntPtr clientAddress;
+        private readonly IntPtr engineAddress;
+
         private readonly IntPtr windowHandle;
-        private readonly ChristConfiguration configuration;
+        private readonly ConfigurationManager<ChristConfiguration> configuration;
         private readonly List<Component> components;
+        private readonly Timer writeTimer;
         private short? pressedKey;
 
-        public ChristWare(string processName, ChristConfiguration configuration)
+        public ChristWare(string processName, ConfigurationManager<ChristConfiguration> configuration)
         {
             if (!ProcessUtility.TryGetProcessHandle("csgo", out var process, out processHandle))
                 throw new ArgumentException("No CSGO process found.");
 
             this.windowHandle = process.MainWindowHandle;
 
-            Console.WriteLine("Process Handle: " + processHandle);
-
             if (!ProcessUtility.TryGetProcessModule(process, "client_panorama.dll", out clientAddress))
                 throw new ArgumentException("No CSGO client panorama module found.");
 
-            this.configuration = configuration;
+            if (!ProcessUtility.TryGetProcessModule(process, "engine.dll", out engineAddress))
+                throw new ArgumentException("No CSGO engine module found.");
 
+            Console.WriteLine("Process Handle: " + processHandle);
             Console.WriteLine($"Client Module: 0x{clientAddress.ToString("x")}");
-
-            ConsoleUtility.WriteLineColor($"{ASCII_ART}\n", ConsoleColor.Yellow, false);
-
+            ConsoleUtility.WriteLineColor($"{ASCII_ART}\n", ConsoleColor.Yellow);
             Console.CursorVisible = false;
 
-            components = new List<Component>();
+            this.configuration = configuration;
 
-            components.Add(new ESP(processHandle, clientAddress, configuration));
-            components.Add(new Radar(processHandle, clientAddress, configuration));
-            components.Add(new TriggerBot(processHandle, clientAddress, configuration));
-            components.Add(new BunnyHop(processHandle, clientAddress, configuration));
+            components = new List<Component>
+            {
+                new ESP(processHandle, clientAddress, engineAddress, configuration.Configuration),
+                new Radar(processHandle, clientAddress, engineAddress, configuration.Configuration),
+                new TriggerBot(processHandle, clientAddress, engineAddress, configuration.Configuration),
+                new BunnyHop(processHandle, clientAddress, engineAddress, configuration.Configuration),
+                new AntiFlash(processHandle, clientAddress, engineAddress, configuration.Configuration),
+                new RecoilControl(processHandle, clientAddress, engineAddress, configuration.Configuration)
+            };
+
+            // Update configuration
+            configuration.Write();
+
+            writeTimer = new Timer((_) => UpdateConsole(), null, 0, (int)TimeSpan.FromSeconds(1.5).TotalMilliseconds);
         }
 
-
+        public void UpdateConsole()
+        {
+            Console.Clear();
+            ConsoleUtility.WriteLineColor(ASCII_ART + '\n', ConsoleColor.Yellow);
+            foreach (var component in components)
+            {
+                ConsoleUtility.WriteColor($"{component.Name} ({component.Hotkey}): ");
+                ConsoleUtility.WriteLineColor(component.Enabled ? "Enabled" : "Disabled", component.Enabled ? ConsoleColor.Green : ConsoleColor.Red);
+            }
+        }
         public void Run()
         {
             while (true)
@@ -68,16 +85,12 @@ namespace ChristWare
                     Environment.Exit(0);
                 }
 
-                Console.SetCursorPosition(0, 10);
-
                 if (pressedKey.HasValue && !KeyUtility.IsKeyDown(pressedKey.Value))
                     pressedKey = null;
 
                 foreach (var component in components)
                 {
-                    ConsoleUtility.WriteColor($"{component.Name} ({component.Hotkey}): ");
-                    ConsoleUtility.WriteLineColor(component.Enabled ? "Enabled" : "Disabled", component.Enabled ? ConsoleColor.Green : ConsoleColor.Red);
-                    var currentlyPressedKey = VkKeyScanA(component.Hotkey) & 0x00FF;
+                    var currentlyPressedKey = component.Hotkey.Value;
 
                     if (!pressedKey.HasValue
                         && WindowUtility.GetForegroundWindow() == windowHandle
@@ -121,6 +134,7 @@ namespace ChristWare
             Console.Beep(494, 235 * 2);
         }
 
+
         private const string ASCII_ART = @"
    _____ _          _     ___          __            
   / ____| |        (_)   | \ \        / /             
@@ -128,6 +142,9 @@ namespace ChristWare
  | |    | '_ \| '__| / __| __\ \/  \/ / _` | '__/ _ \
  | |____| | | | |  | \__ \ |_ \  /\  / (_| | | |  __/
   \_____|_| |_|_|  |_|___/\__| \/  \/ \__,_|_|  \___|
+
+    I have the strength to face all conditions
+        by the power that Christ gives me.
 ";
     }
 }

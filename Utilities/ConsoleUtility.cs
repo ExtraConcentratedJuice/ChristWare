@@ -8,22 +8,17 @@ namespace ChristWare.Utilities
 {
     public static class ConsoleUtility
     {
-        public static void WriteLineColor(object text, ConsoleColor color = ConsoleColor.White, bool takeLine = true)
+        public static void WriteLineColor(object text, ConsoleColor color = ConsoleColor.White)
         {
             Console.ForegroundColor = color;
-
-            if (takeLine)
-                Console.WriteLine(text + new String(' ', Console.WindowWidth - text.ToString().Length - 2));
-            else
-                Console.WriteLine(text);
-
+            Console.WriteLine(text);
             Console.ResetColor();
         }
 
         public static void WriteColor(object text, ConsoleColor color = ConsoleColor.White)
         {
             Console.ForegroundColor = color;
-            Console.WriteLine(text);
+            Console.Write(text);
             Console.ResetColor();
         }
     }

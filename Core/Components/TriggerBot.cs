@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -13,20 +14,21 @@ namespace ChristWare.Core.Components
     public class TriggerBot : Component, ITickHandler
     {
         public override string Name => "TriggerBot";
-        public override char Hotkey => 'i';
+        public override HotKey DefaultHotkey => new HotKey('i');
+        private readonly HotKey triggerBotHoldKey;
 
         private volatile bool firing;
 
-        public TriggerBot(IntPtr processHandle, IntPtr clientAddress, ChristConfiguration configuration)
-            : base(processHandle, clientAddress, configuration)
+        public TriggerBot(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ChristConfiguration configuration)
+            : base(processHandle, clientAddress, engineAddress, configuration)
         {
+            triggerBotHoldKey = new HotKey(configuration.TriggerBotHoldKey);
             new Thread(CheckFire).Start();
         }
 
         public void OnTick()
         {
-            // Keycode for back mouse button
-            if (!KeyUtility.IsKeyDown(0x05))
+            if (!KeyUtility.IsKeyDown(triggerBotHoldKey.Value) || firing)
                 return;
 
             var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
@@ -41,7 +43,7 @@ namespace ChristWare.Core.Components
                 {
                     var otherTeam = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
 
-                    if (otherTeam != team && !firing)
+                    if (otherTeam != team)
                         firing = true;
                 }
             }
@@ -53,8 +55,8 @@ namespace ChristWare.Core.Components
             {
                 if (firing)
                 {
-                    Thread.Sleep(ThreadSafeRandom.Next(75, 115));
-                    Clicker.TriggerLeftClick(ThreadSafeRandom.Next(15, 25));
+                    Thread.Sleep(ThreadSafeRandom.Next(40, 80));
+                    Clicker.TriggerLeftClick(ThreadSafeRandom.Next(10, 15));
 
                    firing = false;
                 }
