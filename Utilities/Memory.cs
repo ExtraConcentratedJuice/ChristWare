@@ -52,5 +52,21 @@ namespace ChristWare.Utilities
 
             WriteProcessMemory((int)handle, address, temp, size, ref bytesWritten);
         }
+
+        public static string ReadString(IntPtr handle, int address, int size, Encoding encoding) => ReadString(handle, address, size, encoding, out var _);
+
+        public static string ReadString(IntPtr handle, int address, int size, Encoding encoding, out int bytesRead)
+        {
+            bytesRead = default;
+            byte[] buffer = new byte[size];
+
+            ReadProcessMemory((int)handle, address, buffer, size, ref bytesRead);
+
+            string text = encoding.GetString(buffer);
+            var nullTermIndex = text.IndexOf('\0');
+
+            //return nullTermIndex == -1 ? text : text.Substring(0, nullTermIndex);
+            return text;
+        }
     }
 }

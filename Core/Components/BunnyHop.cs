@@ -14,7 +14,7 @@ namespace ChristWare.Core.Components
         public override HotKey DefaultHotkey => new HotKey('n');
         private readonly HotKey bunnyHopHoldKey;
 
-        private volatile bool jumping;
+        private volatile bool jumping = false;
 
         private const int FL_ONGROUND = (1 << 0);
 

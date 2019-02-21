@@ -11,6 +11,7 @@ using ChristWare.Core;
 using System.Reflection;
 using ChristWare.Core.Components;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace ChristWare
 {
@@ -69,12 +70,85 @@ namespace ChristWare
         {
             Console.Clear();
             ConsoleUtility.WriteLineColor(ASCII_ART + '\n', ConsoleColor.Yellow);
+
             foreach (var component in components)
             {
                 ConsoleUtility.WriteColor($"{component.Name} ({component.Hotkey}): ");
                 ConsoleUtility.WriteLineColor(component.Enabled ? "Enabled" : "Disabled", component.Enabled ? ConsoleColor.Green : ConsoleColor.Red);
             }
+
+            var clientState = Memory.Read<int>(processHandle, (int)engineAddress + Signatures.dwClientState);
+            var flags = Memory.Read<int>(processHandle, clientState + Signatures.dwClientState_State);
+            var inGame = flags == (int)SignOnState.IN_GAME;
+
+            Console.WriteLine();
+
+            ConsoleUtility.WriteColor("Status: ");
+            ConsoleUtility.WriteLineColor(inGame ? "IN-GAME" : "NOT IN-GAME", inGame ? ConsoleColor.Green : ConsoleColor.Red);
+
+            Console.WriteLine();
+
+            if (!inGame)
+                return;
+
+            // should probably update to map to entity struct but oh well
+            var friendly = new List<string>();
+            var enemy = new List<string>();
+
+            var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
+            var teamId = Memory.Read<int>(processHandle, localPlayer + Netvars.m_iTeamNum);
+            var playerResources = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwPlayerResource);
+
+
+            // I don't even know what I am doing here, somebody please help me.
+            // This is supposed to get me the PlayerInfo array.
+            var addr = Memory.Read<int>(processHandle, 
+                Memory.Read<int>(processHandle, 
+                    Memory.Read<int>(processHandle, clientState + Signatures.dwClientState_PlayerInfo)
+                    + 0x40)
+                + 0x0C);            
+
+            for (int i = 1; i <= 32; i++)
+            {
+                var entity = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwEntityList + i * 0x10);
+
+                if (entity != 0)
+                {
+                    var otherTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
+
+                    var rank = Memory.Read<int>(processHandle, playerResources + Netvars.m_iCompetitiveRanking + i * 0x4);
+                    var hp = Memory.Read<int>(processHandle, entity + Netvars.m_iHealth);
+
+                    // Read playerinfo struct of index i then add offset of name
+                    var name = Memory.ReadString(processHandle, 
+                            Memory.Read<int>(processHandle, addr + 0x28 + i * 0x34) + 0x10,
+                        128, Encoding.UTF8);
+
+                    var weaponIndex = Memory.Read<int>(processHandle, entity + Netvars.m_hActiveWeapon) & 0xFFF;
+                    var gun = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwEntityList + (weaponIndex - 0x1) * 0x10);
+                    var gunId = Memory.Read<int>(processHandle, gun + Netvars.m_iItemDefinitionIndex);
+
+                    List<string> list;
+                    if (otherTeamId == 2 || otherTeamId == 3)
+                        list = otherTeamId == teamId ? friendly : enemy;
+                    else
+                        list = friendly;
+                    
+                    list.Add($"{name.Trim()}\nHP: {hp,-3} | Weapon: {Weapons.GetName(gunId),-16} | Rank: {Ranks.GetName(rank)}\n");
+                }
+            }
+
+            Console.WriteLine();
+            ConsoleUtility.WriteLineColor("Friendly", ConsoleColor.Green);
+            foreach (var x in friendly)
+                ConsoleUtility.WriteLineColor(x);
+
+            Console.WriteLine();
+            ConsoleUtility.WriteLineColor("Enemy", ConsoleColor.Red);
+            foreach (var x in enemy)
+                ConsoleUtility.WriteLineColor(x);
         }
+
         public void Run()
         {
             while (true)
@@ -88,16 +162,36 @@ namespace ChristWare
                 if (pressedKey.HasValue && !KeyUtility.IsKeyDown(pressedKey.Value))
                     pressedKey = null;
 
+                var foregroundWindow = WindowUtility.GetForegroundWindow();
+
+                if ((foregroundWindow == windowHandle || foregroundWindow == Process.GetCurrentProcess().MainWindowHandle)
+                    && KeyUtility.IsKeyDown(0x2D)
+                    && !pressedKey.HasValue)
+                {
+                    pressedKey = 0x2D;
+                    if (foregroundWindow == windowHandle)
+                        WindowUtility.SetTopWindow(Process.GetCurrentProcess().MainWindowHandle);
+                    else
+                        WindowUtility.SetTopWindow(windowHandle);
+                }
+
+                var clientState = Memory.Read<int>(processHandle, (int)engineAddress + Signatures.dwClientState);
+                var flags = Memory.Read<int>(processHandle, clientState + Signatures.dwClientState_State);
+                var inGame = flags == (int)SignOnState.IN_GAME;
+
+                if (!inGame)
+                    continue;
+
                 foreach (var component in components)
                 {
-                    var currentlyPressedKey = component.Hotkey.Value;
+                    var currentHotkey = component.Hotkey.Value;
 
                     if (!pressedKey.HasValue
-                        && WindowUtility.GetForegroundWindow() == windowHandle
-                        && KeyUtility.IsKeyDown(currentlyPressedKey)
+                        && foregroundWindow == windowHandle
+                        && KeyUtility.IsKeyDown(currentHotkey)
                         && (Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwMouseEnable) ^ (int)clientAddress + Signatures.dwMouseEnablePtr) != 0)
                     {
-                        pressedKey = (short?)currentlyPressedKey;
+                        pressedKey = (short?)currentHotkey;
 
                         if (component.Enabled)
                             component.Disable();
