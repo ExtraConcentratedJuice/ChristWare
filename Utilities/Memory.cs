@@ -13,7 +13,7 @@ namespace ChristWare.Utilities
         public static extern bool ReadProcessMemory(int hProcess, int lpBaseAddress, byte[] lpBuffer, int dwSize, ref int lpNumberOfBytesRead);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool WriteProcessMemory(int hProcess, int lpBaseAddress, byte[] lpBuffer, int dwSize, ref int lpNumberOfBytesWritten);
+        public static extern bool WriteProcessMemory(int hProcess, int lpBaseAddress, byte[] lpBuffer, int dwSize, ref int lpNumberOfBytesWritten);
 
         public static T Read<T>(IntPtr handle, int address) where T : struct => Read<T>(handle, address, out var _);
         public static void Write<T>(IntPtr handle, int address, T value) where T : struct => Write<T>(handle, address, value, out var _);

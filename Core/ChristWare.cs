@@ -57,7 +57,9 @@ namespace ChristWare
                 new TriggerBot(processHandle, clientAddress, engineAddress, configuration.Configuration),
                 new BunnyHop(processHandle, clientAddress, engineAddress, configuration.Configuration),
                 new AntiFlash(processHandle, clientAddress, engineAddress, configuration.Configuration),
-                new RecoilControl(processHandle, clientAddress, engineAddress, configuration.Configuration)
+                new RecoilControl(processHandle, clientAddress, engineAddress, configuration.Configuration),
+                new Chams(processHandle, clientAddress, engineAddress, configuration.Configuration),
+                new TagChanger(processHandle, clientAddress, engineAddress, configuration.Configuration)
             };
 
             // Update configuration
@@ -116,7 +118,7 @@ namespace ChristWare
                 {
                     var otherTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
 
-                    var rank = Memory.Read<int>(processHandle, playerResources + Netvars.m_iCompetitiveRanking + i * 0x4);
+                    var rank = Memory.Read<int>(processHandle, playerResources + Netvars.m_iCompetitiveRanking + (i - 0x1) * 0x4);
                     var hp = Memory.Read<int>(processHandle, entity + Netvars.m_iHealth);
 
                     // Read playerinfo struct of index i then add offset of name
@@ -137,7 +139,7 @@ namespace ChristWare
                     list.Add($"{name.Trim()}\nHP: {hp,-3} | Weapon: {Weapons.GetName(gunId),-16} | Rank: {Ranks.GetName(rank)}\n");
                 }
             }
-
+            
             Console.WriteLine();
             ConsoleUtility.WriteLineColor("Friendly", ConsoleColor.Green);
             foreach (var x in friendly)
@@ -180,7 +182,10 @@ namespace ChristWare
                 var inGame = flags == (int)SignOnState.IN_GAME;
 
                 if (!inGame)
+                {
+                    Thread.Sleep(5);
                     continue;
+                }
 
                 foreach (var component in components)
                 {

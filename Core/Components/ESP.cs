@@ -20,7 +20,6 @@ namespace ChristWare.Core.Components
         protected override void OnDisable()
         {
             Beeper.Beep(195, 215);
-
         }
 
         protected override void OnEnable()
