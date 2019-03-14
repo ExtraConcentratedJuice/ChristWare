@@ -1,6 +1,7 @@
 ﻿using ChristWare.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace ChristWare.Core.Components
         public override string Name => "Chams";
         public override HotKey DefaultHotkey => new HotKey(',');
 
-        public Chams(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ChristConfiguration configuration)
+        public Chams(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ConfigurationManager<ChristConfiguration> configuration)
             : base(processHandle, clientAddress, engineAddress, configuration)
         {
         }
@@ -24,9 +25,9 @@ namespace ChristWare.Core.Components
 
             var entityTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
 
-            var r = entityTeamId != teamId ? configuration.EnemyChamsR : configuration.FriendlyChamsR;
-            var g = entityTeamId != teamId ? configuration.EnemyChamsG : configuration.FriendlyChamsG;
-            var b = entityTeamId != teamId ? configuration.EnemyChamsB : configuration.FriendlyChamsB;
+            var r = entityTeamId != teamId ? configuration.Value.EnemyChamsR : configuration.Value.FriendlyChamsR;
+            var g = entityTeamId != teamId ? configuration.Value.EnemyChamsG : configuration.Value.FriendlyChamsG;
+            var b = entityTeamId != teamId ? configuration.Value.EnemyChamsB : configuration.Value.FriendlyChamsB;
 
             var entityRender = entity + Netvars.m_clrRender;
 
@@ -35,7 +36,7 @@ namespace ChristWare.Core.Components
             Memory.Write<byte>(processHandle, entityRender + 0x2, b); // B
 
             var ambient = Memory.Read<int>(processHandle, (int)engineAddress + Signatures.model_ambient_min - 0x2C);
-            Memory.Write<int>(processHandle, (int)engineAddress + Signatures.model_ambient_min, BitUtility.XorFloat(configuration.ChamsBrightness, ambient));
+            Memory.Write<int>(processHandle, (int)engineAddress + Signatures.model_ambient_min, BitUtility.XorFloat(configuration.Value.ChamsBrightness, ambient));
         }
 
         protected override void OnDisable()
@@ -56,12 +57,6 @@ namespace ChristWare.Core.Components
 
             var ambient = Memory.Read<int>(processHandle, (int)engineAddress + Signatures.model_ambient_min - 0x2C);
             Memory.Write<int>(processHandle, (int)engineAddress + Signatures.model_ambient_min, BitUtility.XorFloat(0F, ambient));
-            Beeper.Beep(195, 215);
-        }
-
-        protected override void OnEnable()
-        {
-            Beeper.Beep(783, 215);
         }
     }
 }

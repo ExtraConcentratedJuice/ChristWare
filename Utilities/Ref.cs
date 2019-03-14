@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChristWare.Core
+namespace ChristWare.Utilities
 {
-    public interface IEntityHandler
+    public class Ref<T>
     {
-        void HandleEntity(int entity);
+        public T Value { get; set; }
     }
 }

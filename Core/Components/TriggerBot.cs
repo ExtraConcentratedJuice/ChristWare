@@ -19,10 +19,10 @@ namespace ChristWare.Core.Components
 
         private volatile bool firing;
 
-        public TriggerBot(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ChristConfiguration configuration)
+        public TriggerBot(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ConfigurationManager<ChristConfiguration> configuration)
             : base(processHandle, clientAddress, engineAddress, configuration)
         {
-            triggerBotHoldKey = new HotKey(configuration.TriggerBotHoldKey);
+            triggerBotHoldKey = new HotKey(configuration.Value.TriggerBotHoldKey);
             new Thread(CheckFire).Start();
         }
 
@@ -63,17 +63,6 @@ namespace ChristWare.Core.Components
 
                 Thread.Sleep(2);
             }
-        }
-
-        protected override void OnDisable()
-        {
-            Beeper.Beep(195, 215);
-
-        }
-
-        protected override void OnEnable()
-        {
-            Beeper.Beep(783, 215);
         }
     }
 }

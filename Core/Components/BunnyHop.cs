@@ -18,10 +18,10 @@ namespace ChristWare.Core.Components
 
         private const int FL_ONGROUND = (1 << 0);
 
-        public BunnyHop(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ChristConfiguration configuration)
+        public BunnyHop(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ConfigurationManager<ChristConfiguration> configuration)
             : base(processHandle, clientAddress, engineAddress, configuration)
         {
-            bunnyHopHoldKey = new HotKey(configuration.BunnyHopHoldKey);
+            bunnyHopHoldKey = new HotKey(configuration.Value.BunnyHopHoldKey);
             new Thread(CheckJump).Start();
         }
 
@@ -31,7 +31,7 @@ namespace ChristWare.Core.Components
                 return;
 
             var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
-            var flags = Memory.Read<int>(processHandle, localPlayer+ Netvars.m_fFlags);
+            var flags = Memory.Read<int>(processHandle, localPlayer + Netvars.m_fFlags);
 
             if ((flags & FL_ONGROUND) == 1)
                 jumping = true;
@@ -54,16 +54,6 @@ namespace ChristWare.Core.Components
 
                 Thread.Sleep(2);
             }
-        }
-
-        protected override void OnDisable()
-        {
-            Beeper.Beep(195, 215);
-        }
-
-        protected override void OnEnable()
-        {
-            Beeper.Beep(783, 215);
         }
     }
 }

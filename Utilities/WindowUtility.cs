@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +18,9 @@ namespace ChristWare.Utilities
             public int Right { get; set; }
             public int Bottom { get; set; }
         }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
@@ -40,6 +44,18 @@ namespace ChristWare.Utilities
         {
             var buffer = new StringBuilder(256);
             return GetWindowText(GetForegroundWindow(), buffer, 256) > 0 ? buffer.ToString() : null;
+        }
+
+        public static bool TryGetActiveWindowDimensions(out Vector2 dimensions)
+        {
+            dimensions = default;
+
+            if (!GetWindowRect(GetForegroundWindow(), out var rect))
+                return false;
+
+            dimensions = new Vector2(rect.Right - rect.Left, rect.Bottom - rect.Top);
+
+            return true;
         }
 
         public static bool SetTopWindow(IntPtr handle) => SetForegroundWindow(handle);

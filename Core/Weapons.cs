@@ -8,6 +8,13 @@ namespace ChristWare.Core
 {
     public static class Weapons
     {
+        private static readonly int[] singleShots = new int[]
+        {
+            1, 2, 3, 4, 9, 30, 32, 36, 40, 61, 63, 64
+        };
+
+        public static bool IsSingleShot(int id) => singleShots.Contains(id);
+
         public static string GetName(int id)
         {
             switch (id)

@@ -33,19 +33,19 @@ namespace ChristWare.Utilities
             return true;
         }
 
-        public static bool TryGetProcessModule(Process process, string moduleName, out IntPtr address)
+        public static bool TryGetProcessModule(Process process, string moduleName, out ProcessModule module)
         {
             if (process == null)
                 throw new ArgumentNullException(nameof(process));
 
-            address = default;
+            module = default;
 
             foreach (var x in process.Modules.OfType<ProcessModule>())
             {
                 if (x.ModuleName == moduleName)
                 {
-                    address = x.BaseAddress;
-                    return address != IntPtr.Zero;
+                    module = x;
+                    return true;
                 }
             }
 

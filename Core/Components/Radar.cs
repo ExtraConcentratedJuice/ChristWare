@@ -1,6 +1,7 @@
 ﻿using ChristWare.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,20 +13,9 @@ namespace ChristWare.Core.Components
         public override string Name => "Radar";
         public override HotKey DefaultHotkey => new HotKey('o');
 
-        public Radar(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ChristConfiguration configuration)
+        public Radar(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ConfigurationManager<ChristConfiguration> configuration)
             : base(processHandle, clientAddress, engineAddress, configuration)
         {
-        }
-
-        protected override void OnDisable()
-        {
-            Beeper.Beep(195, 215);
-
-        }
-
-        protected override void OnEnable()
-        {
-            Beeper.Beep(783, 215);
         }
 
         public void HandleEntity(int entity)
@@ -36,7 +26,7 @@ namespace ChristWare.Core.Components
             var health = Memory.Read<int>(processHandle, entity + Netvars.m_iHealth);
 
             if (health <= 0)
-                return ;
+                return;
 
             var entityTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
 

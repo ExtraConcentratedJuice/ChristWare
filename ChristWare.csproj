@@ -8,10 +8,12 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>ChristWare</RootNamespace>
     <AssemblyName>ChristWare</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -27,8 +29,7 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -62,6 +63,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\x86\Release\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
@@ -80,8 +84,7 @@
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>
-    </ApplicationIcon>
+    <ApplicationIcon>727px-JHS-IHS-Monogram-Name-Jesus.svg.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
@@ -93,6 +96,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Xml.Linq" />
@@ -106,9 +110,11 @@
     <Compile Include="Core\ChristWare.cs" />
     <Compile Include="Core\ChristConfiguration.cs" />
     <Compile Include="Core\Component.cs" />
+    <Compile Include="Core\Components\Aimbot.cs" />
     <Compile Include="Core\Components\AntiFlash.cs" />
     <Compile Include="Core\Components\BunnyHop.cs" />
     <Compile Include="Core\Components\Chams.cs" />
+    <Compile Include="Core\Components\BoxESP.cs" />
     <Compile Include="Core\Components\ESP.cs" />
     <Compile Include="Core\Components\Radar.cs" />
     <Compile Include="Core\Components\RecoilControl.cs" />
@@ -116,32 +122,41 @@
     <Compile Include="Core\Components\TriggerBot.cs" />
     <Compile Include="Core\ConfigurationManager.cs" />
     <Compile Include="Core\Constants.cs" />
+    <Compile Include="Core\GlobalState.cs" />
     <Compile Include="Core\Hitbox.cs" />
     <Compile Include="Core\HotKey.cs" />
     <Compile Include="Core\IEntityHandler.cs" />
     <Compile Include="Core\ITickHandler.cs" />
-    <Compile Include="Core\Offsets.cs" />
+    <Compile Include="Core\Offsets\NetvarAttribute.cs" />
+    <Compile Include="Core\Offsets\Offsets.cs" />
+    <Compile Include="Core\Offsets\PatternAttribute.cs" />
     <Compile Include="Core\SignOnState.cs" />
     <Compile Include="Core\TagManager.cs" />
     <Compile Include="Core\Weapons.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\ChristWareUI.cs" />
     <Compile Include="Utilities\Beeper.cs" />
     <Compile Include="Utilities\BitUtility.cs" />
     <Compile Include="Utilities\Clicker.cs" />
     <Compile Include="Utilities\ConsoleUtility.cs" />
     <Compile Include="Utilities\ExternalMemoryUtility.cs" />
+    <Compile Include="Utilities\FileUtility.cs" />
     <Compile Include="Utilities\KeyUtility.cs" />
     <Compile Include="Utilities\Memory.cs" />
+    <Compile Include="Utilities\PlayerUtility.cs" />
     <Compile Include="Utilities\ProcessUtility.cs" />
-    <Compile Include="Utilities\Ranks.cs" />
+    <Compile Include="Core\Ranks.cs" />
+    <Compile Include="Utilities\Ref.cs" />
+    <Compile Include="Utilities\ScannerUtility.cs" />
     <Compile Include="Utilities\ThreadSafeRandom.cs" />
     <Compile Include="Utilities\VectorUtility.cs" />
     <Compile Include="Utilities\WindowUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="ChristWare.crproj" />
     <None Include="ChristWare.exe.manifest" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -157,11 +172,14 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="UI\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="727px-JHS-IHS-Monogram-Name-Jesus.svg.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if $(ConfigurationName) == Release (
+$(SolutionDir)..\ConfuserEx\Confuser.CLI.exe $(ProjectDir)ChristWare.crproj
+)</PostBuildEvent>
+  </PropertyGroup>
 </Project>

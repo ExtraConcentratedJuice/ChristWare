@@ -30,8 +30,12 @@ namespace ChristWare
         {
             handler += OnClose;
             SetConsoleCtrlHandler(handler, true);
-            Console.WindowWidth = 154;
-            Console.WindowHeight = 56;
+            Console.WindowWidth = Math.Min(154, Console.LargestWindowWidth);
+            Console.WindowHeight = Math.Min(58, Console.LargestWindowHeight);
+
+            //ChristWareUI.CreateWindow();
+
+            //Console.ReadLine();
 
             var configuration = new ConfigurationManager<ChristConfiguration>("christconfig.json");
             new ChristWare("csgo", configuration).Run();

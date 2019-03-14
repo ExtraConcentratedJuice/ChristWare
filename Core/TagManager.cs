@@ -9,7 +9,18 @@ namespace ChristWare.Core
 {
     public class TagManager
     {
-        private readonly string tag;
+        private string tag;
+
+        public string Tag
+        {
+            get => tag;
+            set
+            {
+                shiftCount = 0;
+                tag = value;
+            }
+        }
+
         private int shiftCount = 0;
 
         public TagManager(string tag)

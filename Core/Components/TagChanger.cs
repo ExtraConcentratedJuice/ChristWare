@@ -1,8 +1,10 @@
 ﻿using ChristWare.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ChristWare.Core.Components
@@ -12,11 +14,6 @@ namespace ChristWare.Core.Components
         public override string Name => "TagChanger";
 
         public override HotKey DefaultHotkey => new HotKey('.');
-
-        public TagChanger(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ChristConfiguration configuration)
-            : base(processHandle, clientAddress, engineAddress, configuration)
-        {
-        }
 
         private readonly byte[] shellcode =
         {
@@ -29,27 +26,43 @@ namespace ChristWare.Core.Components
         };
 
         private IntPtr shellcodeAddress;
-        private readonly TagManager tagManager = new TagManager("ChristWare ✝");
+        private readonly TagManager tagManager;
         private DateTime lastChanged = DateTime.Now;
+
+        public TagChanger(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ConfigurationManager<ChristConfiguration> configuration)
+            : base(processHandle, clientAddress, engineAddress, configuration)
+        {
+            this.tagManager = new TagManager(configuration.Value.ClanTag);
+        }
+
+        protected override void OnConfigurationChanged(object s, FileSystemEventArgs args)
+        {
+            if (configuration.Value.ClanTag != tagManager.Tag)
+                tagManager.Tag = configuration.Value.ClanTag;
+
+            ChangeTag(tagManager.Tag);
+            lastChanged = DateTime.Now;
+        }
 
         public void OnTick()
         {
-            if ((DateTime.Now - lastChanged).TotalSeconds < 1)
+            if (!configuration.Value.RotateClanTag || (DateTime.Now - lastChanged).TotalSeconds < 1)
                 return;
 
             lastChanged = DateTime.Now;
-            ChangeTag(tagManager.ShiftOne());
+            ThreadPool.QueueUserWorkItem(_ => ChangeTag(tagManager.ShiftOne()), null);
         }
 
         protected override void OnDisable()
         {
             ChangeTag(Encoding.UTF8.GetString(Enumerable.Repeat<byte>(0x0, 15).ToArray()));
-            Beeper.Beep(195, 215);
         }
 
         private void ChangeTag(string tag)
         {
-            if (tag.Length > 15)
+            var tagBytes = Encoding.UTF8.GetBytes(tag + '\0');
+
+            if (tag.Length > 16)
                 throw new ArgumentException("A tag length of 15 or less is expected.", nameof(tag));
 
             if (shellcodeAddress == IntPtr.Zero)
@@ -62,7 +75,6 @@ namespace ChristWare.Core.Components
 
             var addressBytes = BitConverter.GetBytes((int)(shellcodeAddress + 18));
             var changeTagAddress = BitConverter.GetBytes((int)(engineAddress + Signatures.dwSetClanTag));
-            var tagBytes = Encoding.UTF8.GetBytes(tag + '\0');
 
             Array.Copy(addressBytes, 0, executedShellcode, 1, 4);
             Array.Copy(addressBytes, 0, executedShellcode, 6, 4);
@@ -75,7 +87,8 @@ namespace ChristWare.Core.Components
 
         protected override void OnEnable()
         {
-            Beeper.Beep(783, 215);
+            ChangeTag(tagManager.Tag);
+            lastChanged = DateTime.Now;
         }
     }
 }

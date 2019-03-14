@@ -12,19 +12,20 @@ using System.Reflection;
 using ChristWare.Core.Components;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace ChristWare
 {
     public class ChristWare
     {
-        [DllImport("user32.dll")]
-        public static extern short GetAsyncKeyState(int vKey);
+        private const string VERSION = "v1.2.0";
 
         private readonly IntPtr processHandle;
         private readonly IntPtr clientAddress;
         private readonly IntPtr engineAddress;
-
-        private readonly IntPtr windowHandle;
+        private readonly Graphics graphics;
+        private readonly IntPtr overlayHandle;
+        private readonly IntPtr csgoWindowHandle;
         private readonly ConfigurationManager<ChristConfiguration> configuration;
         private readonly List<Component> components;
         private readonly Timer writeTimer;
@@ -35,35 +36,46 @@ namespace ChristWare
             if (!ProcessUtility.TryGetProcessHandle("csgo", out var process, out processHandle))
                 throw new ArgumentException("No CSGO process found.");
 
-            this.windowHandle = process.MainWindowHandle;
+            this.csgoWindowHandle = process.MainWindowHandle;
 
-            if (!ProcessUtility.TryGetProcessModule(process, "client_panorama.dll", out clientAddress))
+            if (!ProcessUtility.TryGetProcessModule(process, "client_panorama.dll", out var clientModule))
                 throw new ArgumentException("No CSGO client panorama module found.");
 
-            if (!ProcessUtility.TryGetProcessModule(process, "engine.dll", out engineAddress))
+            clientAddress = clientModule.BaseAddress;
+
+            if (!ProcessUtility.TryGetProcessModule(process, "engine.dll", out var engineModule))
                 throw new ArgumentException("No CSGO engine module found.");
+
+            engineAddress = engineModule.BaseAddress;
 
             Console.WriteLine("Process Handle: " + processHandle);
             Console.WriteLine($"Client Module: 0x{clientAddress.ToString("x")}");
+
+            Netvars.Initialize(processHandle, (int)clientAddress);
+
             ConsoleUtility.WriteLineColor($"{ASCII_ART}\n", ConsoleColor.Yellow);
             Console.CursorVisible = false;
 
-            this.configuration = configuration;
 
+            this.configuration = configuration;
+            //this.overlayHandle = ChristWareUI.CreateWindow();
+            //this.graphics = Graphics.FromHwnd(overlayHandle);
             components = new List<Component>
             {
-                new ESP(processHandle, clientAddress, engineAddress, configuration.Configuration),
-                new Radar(processHandle, clientAddress, engineAddress, configuration.Configuration),
-                new TriggerBot(processHandle, clientAddress, engineAddress, configuration.Configuration),
-                new BunnyHop(processHandle, clientAddress, engineAddress, configuration.Configuration),
-                new AntiFlash(processHandle, clientAddress, engineAddress, configuration.Configuration),
-                new RecoilControl(processHandle, clientAddress, engineAddress, configuration.Configuration),
-                new Chams(processHandle, clientAddress, engineAddress, configuration.Configuration),
-                new TagChanger(processHandle, clientAddress, engineAddress, configuration.Configuration)
+                new ESP(processHandle, clientAddress, engineAddress, configuration),
+                new Radar(processHandle, clientAddress, engineAddress, configuration),
+                new TriggerBot(processHandle, clientAddress, engineAddress, configuration),
+                new BunnyHop(processHandle, clientAddress, engineAddress, configuration),
+                new AntiFlash(processHandle, clientAddress, engineAddress, configuration),
+                new RecoilControl(processHandle, clientAddress, engineAddress, configuration),
+                new Aimbot(processHandle, clientAddress, engineAddress, configuration),
+                new Chams(processHandle, clientAddress, engineAddress, configuration),
+                new TagChanger(processHandle, clientAddress, engineAddress, configuration),
+                //new BoxESP(processHandle, clientAddress, engineAddress, configuration.Configuration)
             };
 
             // Update configuration
-            configuration.Write();
+            configuration.WriteToFile();
 
             writeTimer = new Timer((_) => UpdateConsole(), null, 0, (int)TimeSpan.FromSeconds(1.5).TotalMilliseconds);
         }
@@ -71,7 +83,7 @@ namespace ChristWare
         public void UpdateConsole()
         {
             Console.Clear();
-            ConsoleUtility.WriteLineColor(ASCII_ART + '\n', ConsoleColor.Yellow);
+            ConsoleUtility.WriteLineColor(ASCII_ART + $"\n\n\tChristWare {VERSION}\n", ConsoleColor.Yellow);
 
             foreach (var component in components)
             {
@@ -100,7 +112,6 @@ namespace ChristWare
             var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
             var teamId = Memory.Read<int>(processHandle, localPlayer + Netvars.m_iTeamNum);
             var playerResources = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwPlayerResource);
-
 
             // I don't even know what I am doing here, somebody please help me.
             // This is supposed to get me the PlayerInfo array.
@@ -131,6 +142,7 @@ namespace ChristWare
                     var gunId = Memory.Read<int>(processHandle, gun + Netvars.m_iItemDefinitionIndex);
 
                     List<string> list;
+
                     if (otherTeamId == 2 || otherTeamId == 3)
                         list = otherTeamId == teamId ? friendly : enemy;
                     else
@@ -155,7 +167,7 @@ namespace ChristWare
         {
             while (true)
             {
-                if (!WindowUtility.IsHandleWindow(windowHandle))
+                if (!WindowUtility.IsHandleWindow(csgoWindowHandle))
                 {
                     ExitSequence();
                     Environment.Exit(0);
@@ -166,16 +178,21 @@ namespace ChristWare
 
                 var foregroundWindow = WindowUtility.GetForegroundWindow();
 
-                if ((foregroundWindow == windowHandle || foregroundWindow == Process.GetCurrentProcess().MainWindowHandle)
-                    && KeyUtility.IsKeyDown(0x2D)
+                var consoleMenuKey = new HotKey(configuration.Value.ConsoleMenuKey);
+
+                if ((foregroundWindow == csgoWindowHandle || foregroundWindow == Process.GetCurrentProcess().MainWindowHandle)
+                    && KeyUtility.IsKeyDown(consoleMenuKey.Value)
                     && !pressedKey.HasValue)
                 {
-                    pressedKey = 0x2D;
-                    if (foregroundWindow == windowHandle)
+                    pressedKey = (short)consoleMenuKey.Value;
+                    if (foregroundWindow == csgoWindowHandle)
                         WindowUtility.SetTopWindow(Process.GetCurrentProcess().MainWindowHandle);
                     else
-                        WindowUtility.SetTopWindow(windowHandle);
+                        WindowUtility.SetTopWindow(csgoWindowHandle);
                 }
+
+                WindowUtility.GetWindowRect(csgoWindowHandle, out var rect);
+                WindowUtility.SetWindowPos(overlayHandle, csgoWindowHandle, rect.Left, rect.Bottom, rect.Right - rect.Left, rect.Bottom - rect.Top, 0x4000);
 
                 var clientState = Memory.Read<int>(processHandle, (int)engineAddress + Signatures.dwClientState);
                 var flags = Memory.Read<int>(processHandle, clientState + Signatures.dwClientState_State);
@@ -192,7 +209,7 @@ namespace ChristWare
                     var currentHotkey = component.Hotkey.Value;
 
                     if (!pressedKey.HasValue
-                        && foregroundWindow == windowHandle
+                        && foregroundWindow == csgoWindowHandle
                         && KeyUtility.IsKeyDown(currentHotkey)
                         && (Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwMouseEnable) ^ (int)clientAddress + Signatures.dwMouseEnablePtr) != 0)
                     {
@@ -232,7 +249,6 @@ namespace ChristWare
             Console.Beep(440, 235);
             Console.Beep(494, 235 * 2);
         }
-
 
         private const string ASCII_ART = @"
    _____ _          _     ___          __            

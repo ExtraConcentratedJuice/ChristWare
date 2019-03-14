@@ -12,7 +12,7 @@ namespace ChristWare.Core.Components
         public override string Name => "AntiFlash";
         public override HotKey DefaultHotkey => new HotKey(']');
 
-        public AntiFlash(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ChristConfiguration configuration)
+        public AntiFlash(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ConfigurationManager<ChristConfiguration> configuration)
             : base(processHandle, clientAddress, engineAddress, configuration)
         {
         }
@@ -21,16 +21,6 @@ namespace ChristWare.Core.Components
         {
             var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
             Memory.Write<float>(processHandle, localPlayer + Netvars.m_flFlashMaxAlpha, 255F / 2F);
-        }
-
-        protected override void OnDisable()
-        {
-            Beeper.Beep(195, 215);
-        }
-
-        protected override void OnEnable()
-        {
-            Beeper.Beep(783, 215);
         }
     }
 }

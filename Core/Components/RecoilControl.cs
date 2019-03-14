@@ -13,7 +13,7 @@ namespace ChristWare.Core.Components
         public override string Name => "RecoilControl";
         public override HotKey DefaultHotkey => new HotKey('[');
 
-        public RecoilControl(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ChristConfiguration configuration)
+        public RecoilControl(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ConfigurationManager<ChristConfiguration> configuration)
             : base(processHandle, clientAddress, engineAddress, configuration)
         {
         }
@@ -22,6 +22,9 @@ namespace ChristWare.Core.Components
 
         public void OnTick()
         {
+            if (GlobalState.AimBotControllingRecoil)
+                return;
+
             var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
             var shots = Memory.Read<int>(processHandle, localPlayer + Netvars.m_iShotsFired);
             var clientState = Memory.Read<int>(processHandle, (int)engineAddress + Signatures.dwClientState);
@@ -47,16 +50,6 @@ namespace ChristWare.Core.Components
             {
                 oldAngle = Vector3.Zero;
             }
-        }
-
-        protected override void OnDisable()
-        {
-            Beeper.Beep(195, 215);
-        }
-
-        protected override void OnEnable()
-        {
-            Beeper.Beep(783, 215);
         }
     }
 }
