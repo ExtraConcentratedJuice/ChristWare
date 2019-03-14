@@ -18,6 +18,12 @@ namespace ChristWare.Utilities
         public static T Read<T>(IntPtr handle, int address) where T : struct => Read<T>(handle, address, out var _);
         public static void Write<T>(IntPtr handle, int address, T value) where T : struct => Write<T>(handle, address, value, out var _);
 
+        public static bool CanRead(IntPtr handle, int address, int size)
+        {
+            int red = 0;
+            return ReadProcessMemory((int)handle, address, new byte[size], size, ref red);
+        }
+
         public static T Read<T>(IntPtr handle, int address, out int bytesRead) where T : struct
         {
             bytesRead = default;
@@ -65,8 +71,7 @@ namespace ChristWare.Utilities
             string text = encoding.GetString(buffer);
             var nullTermIndex = text.IndexOf('\0');
 
-            //return nullTermIndex == -1 ? text : text.Substring(0, nullTermIndex);
-            return text;
+            return nullTermIndex == -1 ? text : text.Substring(0, nullTermIndex);
         }
     }
 }

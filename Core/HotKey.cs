@@ -14,11 +14,8 @@ namespace ChristWare.Core
         public static extern short VkKeyScanA(char ch);
 
         public string Key { get; set; }
-
-        [JsonIgnore]
         public int Value { get; private set; }
 
-        [JsonConstructor]
         public HotKey(string key)
         {
             if (key.StartsWith("0x"))

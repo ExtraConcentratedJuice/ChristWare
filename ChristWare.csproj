@@ -127,7 +127,12 @@
     <Compile Include="Core\HotKey.cs" />
     <Compile Include="Core\IEntityHandler.cs" />
     <Compile Include="Core\ITickHandler.cs" />
-    <Compile Include="Core\Offsets\NetvarAttribute.cs" />
+    <Compile Include="Core\Offsets\Netvars\ClientClass.cs" />
+    <Compile Include="Core\Offsets\Netvars\ExternalClassWrapper.cs" />
+    <Compile Include="Core\Offsets\Netvars\NetvarAttribute.cs" />
+    <Compile Include="Core\Offsets\Netvars\Netvars.cs" />
+    <Compile Include="Core\Offsets\Netvars\RecvProp.cs" />
+    <Compile Include="Core\Offsets\Netvars\RecvTable.cs" />
     <Compile Include="Core\Offsets\Offsets.cs" />
     <Compile Include="Core\Offsets\PatternAttribute.cs" />
     <Compile Include="Core\SignOnState.cs" />
