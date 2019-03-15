@@ -133,8 +133,8 @@
     <Compile Include="Core\Offsets\Netvars\Netvars.cs" />
     <Compile Include="Core\Offsets\Netvars\RecvProp.cs" />
     <Compile Include="Core\Offsets\Netvars\RecvTable.cs" />
-    <Compile Include="Core\Offsets\Offsets.cs" />
-    <Compile Include="Core\Offsets\PatternAttribute.cs" />
+    <Compile Include="Core\Offsets\Signatures\Signatures.cs" />
+    <Compile Include="Core\Offsets\Signatures\PatternAttribute.cs" />
     <Compile Include="Core\SignOnState.cs" />
     <Compile Include="Core\TagManager.cs" />
     <Compile Include="Core\Weapons.cs" />
@@ -154,7 +154,7 @@
     <Compile Include="Utilities\ProcessUtility.cs" />
     <Compile Include="Core\Ranks.cs" />
     <Compile Include="Utilities\Ref.cs" />
-    <Compile Include="Utilities\ScannerUtility.cs" />
+    <Compile Include="Core\Offsets\Signatures\Scanner.cs" />
     <Compile Include="Utilities\ThreadSafeRandom.cs" />
     <Compile Include="Utilities\VectorUtility.cs" />
     <Compile Include="Utilities\WindowUtility.cs" />

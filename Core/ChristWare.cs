@@ -18,7 +18,7 @@ namespace ChristWare
 {
     public class ChristWare
     {
-        private const string VERSION = "v1.2.0";
+        private const string VERSION = "v1.4.0";
 
         private readonly IntPtr processHandle;
         private readonly IntPtr clientAddress;
@@ -51,7 +51,8 @@ namespace ChristWare
             Console.WriteLine("Process Handle: " + processHandle);
             Console.WriteLine($"Client Module: 0x{clientAddress.ToString("x")}");
 
-            Netvars.Initialize(processHandle, (int)clientAddress);
+            Signatures.Initialize(processHandle, clientModule, engineModule);
+            Netvars.Initialize(processHandle, clientModule);
 
             ConsoleUtility.WriteLineColor($"{ASCII_ART}\n", ConsoleColor.Yellow);
             Console.CursorVisible = false;

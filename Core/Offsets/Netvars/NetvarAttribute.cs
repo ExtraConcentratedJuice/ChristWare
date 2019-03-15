@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChristWare.Core.Offsets
+namespace ChristWare.Core.Offsets.Netvars
 {
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class NetvarAttribute : Attribute
     {
         public string Table { get; set; }

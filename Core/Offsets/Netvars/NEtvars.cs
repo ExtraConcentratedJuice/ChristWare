@@ -1,11 +1,14 @@
 ﻿using ChristWare.Core.Offsets;
 using ChristWare.Core.Offsets.Netvars;
+using ChristWare.Core.Offsets.Signatures;
 using ChristWare.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ChristWare.Core
@@ -14,19 +17,30 @@ namespace ChristWare.Core
     {
         // Thank you to my Java brothers
         // https://github.com/Jonatino/CSGO-Offset-Scanner/tree/master/src/main/java/com/github/jonatino/netvars
-        public static void Initialize(IntPtr processHandle, int clientAddress)
-        {
-            var netvars = new Dictionary<(string, string), int>();
-            var classTable = Memory.Read<int>(processHandle, 0x25FDFD05 + 0x2B);
-            var clientClass = new ClientClass(processHandle, classTable);
 
-            for (; clientClass.Readable; clientClass.BaseAddress = clientClass.Next)
+        public static void Initialize(IntPtr processHandle, ProcessModule clientModule)
+        {
+            Console.WriteLine("Scanning for netvars...");
+            var netvars = new Dictionary<(string, string), int>();
+
+            int read = 0;
+            byte[] clientBytes = new byte[clientModule.ModuleMemorySize];
+            Memory.ReadProcessMemory((int)processHandle, (int)clientModule.BaseAddress, clientBytes, clientModule.ModuleMemorySize, ref read);
+
+            if (!Scanner.TryFind(clientBytes, BitConverter.GetBytes(Signatures.firstClass), new bool[4], out int ctOffset))
+                throw new Exception("Unable to find class table offset");
+
+            var clientClass = new ClientClass(processHandle, Memory.Read<int>(processHandle, ctOffset + (int)clientModule.BaseAddress + 0x2B));
+
+            while (clientClass.Readable)
             {
                 var table = new RecvTable(processHandle, clientClass.Table);
                 var tableName = table.TableName;
 
                 if (tableName.Length > 0 && table.PropCount > 0)
                     ReadTable(processHandle, table, 0, tableName, netvars);
+
+                clientClass.BaseAddress = clientClass.Next;
             }
 
             foreach (var field in typeof(Netvars).GetFields(BindingFlags.Static | BindingFlags.Public))
@@ -38,7 +52,6 @@ namespace ChristWare.Core
 
                 var fieldOffset = netvars[(attribute.Table, attribute.Name)] + attribute.Offset;
                 field.SetValue(null, fieldOffset);
-                Console.WriteLine($"{field.Name} located @ {fieldOffset:X}");
             }
         }
 

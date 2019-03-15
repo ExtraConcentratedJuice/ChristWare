@@ -5,24 +5,31 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChristWare.Core
+namespace ChristWare.Core.Offsets.Signatures
 {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class PatternAttribute : Attribute
     {
         private readonly string signature;
-        private readonly string module;
+        public string Module { get; }
+        public int Extra { get; }
+        public bool Relative { get; }
+        private readonly int[] offsets;
 
         private readonly byte[] patternBytes;
         private readonly bool[] wildcards;
 
         public IReadOnlyList<byte> Pattern { get => patternBytes; }
         public IReadOnlyList<bool> Wildcards { get => wildcards; }
+        public IReadOnlyList<int> Offsets { get => offsets; }
 
-        public PatternAttribute(string module, string signature)
+        public PatternAttribute(string module, string signature, int extra, bool relative, int[] offsets)
         {
-            this.module = module;
+            this.Module = module;
             this.signature = signature;
+            this.Extra = extra;
+            this.Relative = relative;
+            this.offsets = offsets;
 
             var split = signature.Split(' ');
 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChristWare.Core.Offsets
+namespace ChristWare.Core.Offsets.Netvars
 {
     // This might be useful elsewhere...
     public class ExternalClassWrapper
