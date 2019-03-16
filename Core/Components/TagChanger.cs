@@ -66,9 +66,7 @@ namespace ChristWare.Core.Components
                 throw new ArgumentException("A tag length of 15 or less is expected.", nameof(tag));
 
             if (shellcodeAddress == IntPtr.Zero)
-            {
                 shellcodeAddress = ExternalMemoryUtility.Allocate(processHandle, IntPtr.Zero, (uint)shellcode.Length);
-            }
 
             var executedShellcode = new byte[shellcode.Length];
             Array.Copy(shellcode, 0, executedShellcode, 0, shellcode.Length);

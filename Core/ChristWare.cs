@@ -68,8 +68,8 @@ namespace ChristWare
                 new TriggerBot(processHandle, clientAddress, engineAddress, configuration),
                 new BunnyHop(processHandle, clientAddress, engineAddress, configuration),
                 new AntiFlash(processHandle, clientAddress, engineAddress, configuration),
-                new RecoilControl(processHandle, clientAddress, engineAddress, configuration),
                 new Aimbot(processHandle, clientAddress, engineAddress, configuration),
+                new RecoilControl(processHandle, clientAddress, engineAddress, configuration),
                 new Chams(processHandle, clientAddress, engineAddress, configuration),
                 new TagChanger(processHandle, clientAddress, engineAddress, configuration),
                 //new BoxESP(processHandle, clientAddress, engineAddress, configuration.Configuration)

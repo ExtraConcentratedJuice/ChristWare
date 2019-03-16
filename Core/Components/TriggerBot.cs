@@ -55,13 +55,13 @@ namespace ChristWare.Core.Components
             {
                 if (firing)
                 {
-                    Thread.Sleep(ThreadSafeRandom.Next(40, 80));
+                    Thread.Sleep(ThreadSafeRandom.Next(configuration.Value.TriggerBotDelayLowerBoundMilliseconds, configuration.Value.TriggerBotDelayUpperBoundMilliseconds));
                     Clicker.TriggerLeftClick(ThreadSafeRandom.Next(10, 15));
 
                    firing = false;
                 }
 
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
         }
     }

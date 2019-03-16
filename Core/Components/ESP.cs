@@ -33,13 +33,11 @@ namespace ChristWare.Core.Components
             var glow = Memory.Read<int>(processHandle, entity + Netvars.m_iGlowIndex);
             var entityTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
 
-            var r = entityTeamId != teamId ? configuration.Value.EnemyR : configuration.Value.FriendlyR;
-            var g = entityTeamId != teamId ? configuration.Value.EnemyG : configuration.Value.FriendlyG;
-            var b = entityTeamId != teamId ? configuration.Value.EnemyB : configuration.Value.FriendlyB;
+            var color = entityTeamId != teamId ? configuration.Value.EnemyColor : configuration.Value.FriendlyColor;
 
-            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x4, r / 255F); // R
-            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x8, g / 255F); // G
-            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0xC, b / 255F); // B
+            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x4, color.R / 255F); // R
+            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x8, color.G / 255F); // G
+            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0xC, color.B / 255F); // B
             Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x10, 1F); // Alpha
             Memory.Write<int>(processHandle, manager + glow * 0x38 + 0x24, 1); // Toggle
         }

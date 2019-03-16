@@ -25,15 +25,11 @@ namespace ChristWare.Core.Components
 
             var entityTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
 
-            var r = entityTeamId != teamId ? configuration.Value.EnemyChamsR : configuration.Value.FriendlyChamsR;
-            var g = entityTeamId != teamId ? configuration.Value.EnemyChamsG : configuration.Value.FriendlyChamsG;
-            var b = entityTeamId != teamId ? configuration.Value.EnemyChamsB : configuration.Value.FriendlyChamsB;
+            var color = entityTeamId != teamId ? configuration.Value.EnemyChamsColor : configuration.Value.FriendlyChamsColor;
 
             var entityRender = entity + Netvars.m_clrRender;
 
-            Memory.Write<byte>(processHandle, entityRender, r); // R
-            Memory.Write<byte>(processHandle, entityRender + 0x1, g); // G
-            Memory.Write<byte>(processHandle, entityRender + 0x2, b); // B
+            Memory.Write<RGBColor>(processHandle, entityRender, color);
 
             var ambient = Memory.Read<int>(processHandle, (int)engineAddress + Signatures.model_ambient_min - 0x2C);
             Memory.Write<int>(processHandle, (int)engineAddress + Signatures.model_ambient_min, BitUtility.XorFloat(configuration.Value.ChamsBrightness, ambient));
@@ -49,9 +45,7 @@ namespace ChristWare.Core.Components
                 {
                     var entityRender = entity + Netvars.m_clrRender;
 
-                    Memory.Write<byte>(processHandle, entityRender, 255); // R
-                    Memory.Write<byte>(processHandle, entityRender + 0x1, 255); // G
-                    Memory.Write<byte>(processHandle, entityRender + 0x2, 255); // B
+                    Memory.Write<RGBColor>(processHandle, entityRender, new RGBColor { R = 255, G = 255, B = 255 });
                 }
             }
 

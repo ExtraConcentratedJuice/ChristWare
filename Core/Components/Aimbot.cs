@@ -14,6 +14,7 @@ namespace ChristWare.Core.Components
 
         public override HotKey DefaultHotkey => new HotKey('0');
         private HotKey AimBotHoldKey { get; }
+        private int? currentTarget;
 
         public Aimbot(IntPtr processHandle, IntPtr clientAddress, IntPtr engineAddress, ConfigurationManager<ChristConfiguration> configuration)
             : base(processHandle, clientAddress, engineAddress, configuration)
@@ -21,26 +22,18 @@ namespace ChristWare.Core.Components
             AimBotHoldKey = new HotKey(configuration.Value.AimbotHoldKey);
         }
 
-        public void OnTick()
+        protected override void OnDisable()
         {
-            GlobalState.AimBotControllingRecoil = false;
+            currentTarget = null;
+        }
 
-            if (configuration.Value.UseHoldKeyForAimbot && !KeyUtility.IsKeyDown(AimBotHoldKey.Value))
-                return;
-
-            if (!WindowUtility.TryGetActiveWindowDimensions(out var dimensions))
-                return;
+        private List<int> AcquireTargets(int teamId, Vector2 dimensions)
+        {
+            var viewMatrix = Memory.Read<Matrix4x4>(processHandle, (int)clientAddress + Signatures.dwViewMatrix);
+            var inFov = new List<int>();
 
             var midx = dimensions.X / 2;
             var midy = dimensions.Y / 2;
-
-            var viewMatrix = Memory.Read<Matrix4x4>(processHandle, (int)clientAddress + Signatures.dwViewMatrix);
-            var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
-            var localPlayerPos = Memory.Read<Vector3>(processHandle, localPlayer + Netvars.m_vecOrigin);
-            var localPlayerEye = localPlayerPos + Memory.Read<Vector3>(processHandle, localPlayer + Netvars.m_vecViewOffset);
-            var teamId = Memory.Read<int>(processHandle, localPlayer + Netvars.m_iTeamNum);
-
-            var inFov = new List<Vector3>();
 
             for (int i = 1; i <= 32; i++)
             {
@@ -64,17 +57,61 @@ namespace ChristWare.Core.Components
                     continue;
 
                 if (Math.Abs(midx - screen.X) < configuration.Value.AimbotFOV && Math.Abs(midy - screen.Y) < configuration.Value.AimbotFOV)
-                    inFov.Add(enemyPos);
+                    inFov.Add(entity);
             }
 
-            if (inFov.Count <= 0)
+            return inFov;
+        }
+
+        // Not entirely efficient, but I will rewrite it later.
+        public void OnTick()
+        {
+            GlobalState.AimBotControllingRecoil = false;
+
+            if (configuration.Value.UseHoldKeyForAimbot && !KeyUtility.IsKeyDown(AimBotHoldKey.Value))
+            {
+                currentTarget = null;
+                return;
+            }
+
+            if (!WindowUtility.TryGetActiveWindowDimensions(out var dimensions))
                 return;
 
-            var closest = inFov.OrderBy(x => Vector3.Distance(localPlayerEye, x)).First();
+            var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
+            var localPlayerPos = Memory.Read<Vector3>(processHandle, localPlayer + Netvars.m_vecOrigin);
+            var localPlayerEye = localPlayerPos + Memory.Read<Vector3>(processHandle, localPlayer + Netvars.m_vecViewOffset);
+            var teamId = Memory.Read<int>(processHandle, localPlayer + Netvars.m_iTeamNum);
+
+            var inFov = AcquireTargets(teamId, dimensions);
+
+            var closest = inFov.Select(entity => (entity, PlayerUtility.ReadBone(processHandle, entity, 8)))
+                .OrderBy(x => Vector3.Distance(localPlayerEye, x.Item2)).FirstOrDefault();
+
+            var targetLoc = closest.Item2;
+            var target = closest.Item1;
+
+            if (inFov.Count <= 0 && currentTarget != null)
+            {
+                if (Memory.Read<bool>(processHandle, currentTarget.Value + Signatures.m_bDormant) 
+                    || Memory.Read<int>(processHandle, currentTarget.Value + Netvars.m_iHealth) <= 0)
+                {
+                    currentTarget = null;
+                }
+                else
+                {
+                    targetLoc = PlayerUtility.ReadBone(processHandle, currentTarget.Value, 8);
+                    target = currentTarget.Value;
+                }
+            }
+
+            if (target == default)
+                return;
+
+            currentTarget = null;
 
             var clientState = Memory.Read<int>(processHandle, (int)engineAddress + Signatures.dwClientState);
             var currentViewAngles = Memory.Read<Vector3>(processHandle, clientState + Signatures.dwClientState_ViewAngles);
-            var calculatedAngles = VectorUtility.ClampAngle(VectorUtility.VectorAngles((closest - localPlayerEye).Normalize()).NormalizeAngle());
+            var calculatedAngles = VectorUtility.ClampAngle(VectorUtility.VectorAngles((targetLoc - localPlayerEye).Normalize()).NormalizeAngle());
 
             if (configuration.Value.RecoilControlOnAimbot)
             {
@@ -84,12 +121,15 @@ namespace ChristWare.Core.Components
 
                 if (!Weapons.IsSingleShot(weaponId))
                 {
+                    if (configuration.Value.LockTargetOnAimbotWhileShooting)
+                        currentTarget = target;
+
                     GlobalState.AimBotControllingRecoil = true;
                     var punchAngle = Memory.Read<Vector3>(processHandle, localPlayer + Netvars.m_aimPunchAngle);
                     calculatedAngles = VectorUtility.ClampAngle(calculatedAngles - punchAngle * 2F);
                 }
             }
-            
+
             if (configuration.Value.SmoothAim)
             {
                 var delta = VectorUtility.ClampAngle((currentViewAngles - calculatedAngles).NormalizeAngle());
