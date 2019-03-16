@@ -20,6 +20,8 @@ namespace ChristWare
         [Obfuscation(Exclude = false, Feature = "-rename")]
         public string ConsoleMenuKey { get; set; }
 
+        [DefaultValue("christwa.re✝")]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         [Obfuscation(Exclude = false, Feature = "-rename")]
         public string ClanTag { get; set; }
 
