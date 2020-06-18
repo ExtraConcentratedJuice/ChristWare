@@ -38,7 +38,7 @@ namespace ChristWare
 
             this.csgoWindowHandle = process.MainWindowHandle;
 
-            if (!ProcessUtility.TryGetProcessModule(process, "client_panorama.dll", out var clientModule))
+            if (!ProcessUtility.TryGetProcessModule(process, "client.dll", out var clientModule))
                 throw new ArgumentException("No CSGO client panorama module found.");
 
             clientAddress = clientModule.BaseAddress;

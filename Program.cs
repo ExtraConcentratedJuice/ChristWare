@@ -3,6 +3,7 @@ using ChristWare.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -14,6 +15,7 @@ namespace ChristWare
 {
     public class Program
     {
+
         [DllImport("Kernel32")]
         private static extern bool SetConsoleCtrlHandler(ConsoleCtrlHandler handler, bool add);
 
@@ -28,6 +30,7 @@ namespace ChristWare
 
         static void Main(string[] args)
         {
+             
             handler += OnClose;
             SetConsoleCtrlHandler(handler, true);
             Console.WindowWidth = Math.Min(154, Console.LargestWindowWidth);
@@ -36,7 +39,7 @@ namespace ChristWare
             //ChristWareUI.CreateWindow();
 
             //Console.ReadLine();
-
+           
             var configuration = new ConfigurationManager<ChristConfiguration>("christconfig.json");
             new ChristWare("csgo", configuration).Run();
         }
