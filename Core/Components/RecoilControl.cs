@@ -42,6 +42,8 @@ namespace ChristWare.Core.Components
 
                 var newAngle = viewAngle - (punchAngle * 2);
 
+                newAngle = VectorUtility.ClampAngle(newAngle);
+
                 Memory.Write<Vector3>(processHandle, clientState + Signatures.dwClientState_ViewAngles, newAngle);
 
                 oldAngle = punchAngle * 2;

@@ -116,8 +116,8 @@ namespace ChristWare.Core
         public static readonly Int32 dwForceRight;
         [Pattern("engine.dll", "68 ? ? ? ? 8D 85 ? ? ? ? 50 68 ? ? ? ? 68", 0, true, new int[] { 1 })]
         public static readonly Int32 dwGameDir;
-        [Pattern("client_panorama.dll", "A1 ? ? ? ? 85 C0 0F 84 ? ? ? ? 80 B8 ? ? ? ? ? 0F 84 ? ? ? ? 0F 10 05", 0, true, new int[] { 1 })]
-        public static readonly Int32 dwGameRulesProxy;
+        //[Pattern("client_panorama.dll", "A1 ? ? ? ? 85 C0 0F 84 ? ? ? ? 80 B8 ? ? ? ? ? 0F 84 ? ? ? ? 0F 10 05", 0, true, new int[] { 1 })]
+        //public static readonly Int32 dwGameRulesProxy;
         [Pattern("client_panorama.dll", "A1 ? ? ? ? C3 CC CC CC CC CC CC CC CC CC CC A1 ? ? ? ? B9", 0, true, new int[] { 1, 0 })]
         public static readonly Int32 dwGetAllClasses;
         [Pattern("engine.dll", "68 ? ? ? ? 68 ? ? ? ? FF 50 08 85 C0", 0, true, new int[] { 1 })]

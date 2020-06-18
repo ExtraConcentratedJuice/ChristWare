@@ -40,8 +40,11 @@ namespace ChristWare.Core.Components
             if (configuration.Value.ClanTag != tagManager.Tag)
                 tagManager.Tag = configuration.Value.ClanTag;
 
-            ChangeTag(tagManager.Tag);
-            lastChanged = DateTime.Now;
+            if (Enabled)
+            {
+                ChangeTag(tagManager.Tag);
+                lastChanged = DateTime.Now;
+            }
         }
 
         public void OnTick()

@@ -3,8 +3,10 @@ using ChristWare.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -28,8 +30,15 @@ namespace ChristWare
 
         static void Main(string[] args)
         {
+            if (Assembly.GetExecutingAssembly().GetType("ChristWare") != null)
+            {
+                Console.WriteLine("Assembly is not obfuscated, closing now to prevent VAC sigging...");
+                Environment.Exit(0);
+            }
+
             handler += OnClose;
             SetConsoleCtrlHandler(handler, true);
+
             Console.WindowWidth = Math.Min(154, Console.LargestWindowWidth);
             Console.WindowHeight = Math.Min(58, Console.LargestWindowHeight);
 

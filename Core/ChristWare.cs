@@ -14,17 +14,16 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Drawing;
 
+
 namespace ChristWare
 {
     public class ChristWare
     {
-        private const string VERSION = "v1.4.0";
+        private const string VERSION = "v1.5.1";
 
         private readonly IntPtr processHandle;
         private readonly IntPtr clientAddress;
         private readonly IntPtr engineAddress;
-        private readonly Graphics graphics;
-        private readonly IntPtr overlayHandle;
         private readonly IntPtr csgoWindowHandle;
         private readonly ConfigurationManager<ChristConfiguration> configuration;
         private readonly List<Component> components;
@@ -59,8 +58,7 @@ namespace ChristWare
 
 
             this.configuration = configuration;
-            //this.overlayHandle = ChristWareUI.CreateWindow();
-            //this.graphics = Graphics.FromHwnd(overlayHandle);
+
             components = new List<Component>
             {
                 new ESP(processHandle, clientAddress, engineAddress, configuration),
@@ -72,7 +70,7 @@ namespace ChristWare
                 new RecoilControl(processHandle, clientAddress, engineAddress, configuration),
                 new Chams(processHandle, clientAddress, engineAddress, configuration),
                 new TagChanger(processHandle, clientAddress, engineAddress, configuration),
-                //new BoxESP(processHandle, clientAddress, engineAddress, configuration.Configuration)
+                new ThirdPerson(processHandle, clientAddress, engineAddress, configuration),
             };
 
             // Update configuration
@@ -174,6 +172,7 @@ namespace ChristWare
                     Environment.Exit(0);
                 }
 
+
                 if (pressedKey.HasValue && !KeyUtility.IsKeyDown(pressedKey.Value))
                     pressedKey = null;
 
@@ -191,9 +190,6 @@ namespace ChristWare
                     else
                         WindowUtility.SetTopWindow(csgoWindowHandle);
                 }
-
-                WindowUtility.GetWindowRect(csgoWindowHandle, out var rect);
-                WindowUtility.SetWindowPos(overlayHandle, csgoWindowHandle, rect.Left, rect.Bottom, rect.Right - rect.Left, rect.Bottom - rect.Top, 0x4000);
 
                 var clientState = Memory.Read<int>(processHandle, (int)engineAddress + Signatures.dwClientState);
                 var flags = Memory.Read<int>(processHandle, clientState + Signatures.dwClientState_State);
@@ -222,8 +218,11 @@ namespace ChristWare
                             component.Enable();
                     }
 
-                    if (component.Enabled && component is ITickHandler handler)
-                        handler.OnTick();
+                    if (component.Enabled && component is ITickHandler tickHandler)
+                        tickHandler.OnTick();
+
+                    if (component is IGuiHandler guiHandler)
+                        guiHandler.OnGui();
                 }
 
                 for (int i = 1; i <= 32; i++)
