@@ -147,7 +147,7 @@ namespace ChristWare
                     else
                         list = friendly;
                     
-                    list.Add($"{name.Trim()}\nHP: {hp,-3} | Weapon: {Weapons.GetName(gunId),-16} | Rank: {Ranks.GetName(rank)}\n");
+                    list.Add($"{name.Trim()}(HP: {hp,-3})\n Weapon: {Weapons.GetName(gunId),-16} | Rank: {Ranks.GetName(rank)}({rank}) | Wins: {wins}\n");
                 }
             }
             
