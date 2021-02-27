@@ -128,7 +128,8 @@ namespace ChristWare
                 {
                     var otherTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
 
-                    var rank = Memory.Read<int>(processHandle, playerResources + Netvars.m_iCompetitiveRanking + (i - 0x1) * 0x4);
+                    var rank = Memory.Read<int>(processHandle, playerResources + Netvars.m_iCompetitiveRanking + (i + 0x1) * 0x4);
+                    var wins = Memory.Read<int>(processHandle, playerResources + Netvars.m_iCompetitiveWins + (i + 0x1) * 0x4);
                     var hp = Memory.Read<int>(processHandle, entity + Netvars.m_iHealth);
 
                     // Read playerinfo struct of index i then add offset of name
