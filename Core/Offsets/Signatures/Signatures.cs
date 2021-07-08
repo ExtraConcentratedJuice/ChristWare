@@ -88,7 +88,7 @@ namespace ChristWare.Core
         public static readonly Int32 dwClientState_PlayerInfo;
         [Pattern("engine.dll", "83 B8 ? ? ? ? ? 0F 94 C0 C3", 0, false, new int[] { 2 })]
         public static readonly Int32 dwClientState_State;
-        [Pattern("engine.dll", "F3 0F 11 80 ? ? ? ? D9 46 04 D9 05", 0, false, new int[] { 4 })]
+        [Pattern("engine.dll", "F3 0F 11 80 ? ? ? ? F3 0F 10 44 24 38", 0, false, new int[] { 4 })]
         public static readonly Int32 dwClientState_ViewAngles;
         [Pattern("engine.dll", "C7 87 ? ? ? ? ? ? ? ? FF 15 ? ? ? ? 83 C4 08", 0, false, new int[] { 2 })]
         public static readonly Int32 clientstate_delta_ticks;
