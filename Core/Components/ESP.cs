@@ -35,11 +35,11 @@ namespace ChristWare.Core.Components
 
             var color = entityTeamId != teamId ? configuration.Value.EnemyColor : configuration.Value.FriendlyColor;
 
-            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x8, color.R / 255F); // R
-            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0xC, color.G / 255F); // G
-            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x10, color.B / 255F); // B
-            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x14, 1F); // Alpha
-            Memory.Write<int>(processHandle, manager + glow * 0x38 + 0x28, 1); // Toggle
+            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x4 + 0x4, color.R / 255F); // R
+            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x8 + 0x4, color.G / 255F); // G
+            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0xC + 0x4, color.B / 255F); // B
+            Memory.Write<float>(processHandle, manager + glow * 0x38 + 0x10 + 0x4, 1F); // Alpha
+            Memory.Write<int>(processHandle, manager + glow * 0x38 + 0x24 + 0x4, 1); // Toggle
         }
     }
 }
