@@ -82,6 +82,8 @@ namespace ChristWare.Core
             }
         }
 
+        [Netvar("DT_CSPlayer", "m_iAccount")]
+        public static readonly Int32 m_iAccount;
         [Netvar("DT_CSPlayer", "m_ArmorValue")]
         public static readonly Int32 m_ArmorValue;
         [Netvar("DT_BasePlayer", "m_Collision")]

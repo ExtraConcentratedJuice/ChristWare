@@ -19,7 +19,7 @@ namespace ChristWare
 {
     public class ChristWare
     {
-        private const string VERSION = "v1.5.1";
+        private const string VERSION = "v1.5.5";
 
         private readonly IntPtr processHandle;
         private readonly IntPtr clientAddress;
@@ -29,6 +29,7 @@ namespace ChristWare
         private readonly List<Component> components;
         private readonly Timer writeTimer;
         private short? pressedKey;
+        private string PlayerStatus;
 
         public ChristWare(string processName, ConfigurationManager<ChristConfiguration> configuration)
         {
@@ -46,7 +47,6 @@ namespace ChristWare
                 throw new ArgumentException("No CSGO engine module found.");
 
             engineAddress = engineModule.BaseAddress;
-
             Console.WriteLine("Process Handle: " + processHandle);
             Console.WriteLine($"Client Module: 0x{clientAddress.ToString("x")}");
 
@@ -69,8 +69,9 @@ namespace ChristWare
                 new Aimbot(processHandle, clientAddress, engineAddress, configuration),
                 new RecoilControl(processHandle, clientAddress, engineAddress, configuration),
                 new Chams(processHandle, clientAddress, engineAddress, configuration),
-                new TagChanger(processHandle, clientAddress, engineAddress, configuration),
+               // new TagChanger(processHandle, clientAddress, engineAddress, configuration),
                 new ThirdPerson(processHandle, clientAddress, engineAddress, configuration),
+              //  new BombTimer(processHandle, clientAddress, engineAddress, configuration),
             };
 
             // Update configuration
@@ -95,7 +96,7 @@ namespace ChristWare
             var inGame = flags == (int)SignOnState.IN_GAME;
 
             Console.WriteLine();
-
+            // m_dwMapname
             ConsoleUtility.WriteColor("Status: ");
             ConsoleUtility.WriteLineColor(inGame ? "IN-GAME" : "NOT IN-GAME", inGame ? ConsoleColor.Green : ConsoleColor.Red);
 
@@ -128,18 +129,19 @@ namespace ChristWare
                 {
                     var otherTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
 
-                    var rank = Memory.Read<int>(processHandle, playerResources + Netvars.m_iCompetitiveRanking + (i - 0x1) * 0x4);
+                    var rank = Memory.Read<int>(processHandle, playerResources + Netvars.m_iCompetitiveRanking + (i + 0x1) * 0x4);
+                    var wins = Memory.Read<int>(processHandle, playerResources + Netvars.m_iCompetitiveWins + (i + 0x1) * 0x4);
+                    var money = Memory.Read<int>(processHandle, entity + Netvars.m_iAccount);
+                    var isDefusing = Memory.Read<int>(processHandle, entity + Netvars.m_bIsDefusing);
                     var hp = Memory.Read<int>(processHandle, entity + Netvars.m_iHealth);
-
                     // Read playerinfo struct of index i then add offset of name
                     var name = Memory.ReadString(processHandle, 
                             Memory.Read<int>(processHandle, addr + 0x28 + i * 0x34) + 0x10,
                         128, Encoding.UTF8);
-
                     var weaponIndex = Memory.Read<int>(processHandle, entity + Netvars.m_hActiveWeapon) & 0xFFF;
                     var gun = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwEntityList + (weaponIndex - 0x1) * 0x10);
                     var gunId = Memory.Read<int>(processHandle, gun + Netvars.m_iItemDefinitionIndex);
-
+                   // var SurvivalGameRuleDecisionTypes = Memory.Read<int>(processHandle, (int)clientAddress + Netvars.m_SurvivalGameRuleDecisionTypes + Netvars.m_SurvivalRules);
                     List<string> list;
 
                     if (otherTeamId == 2 || otherTeamId == 3)
@@ -147,7 +149,14 @@ namespace ChristWare
                     else
                         list = friendly;
                     
-                    list.Add($"{name.Trim()}\nHP: {hp,-3} | Weapon: {Weapons.GetName(gunId),-16} | Rank: {Ranks.GetName(rank)}\n");
+                    if(hp < 1)
+                    {
+                        PlayerStatus = "Dead";
+                    } else
+                    {
+                        PlayerStatus = "HP: " + hp.ToString();
+                    }
+                    list.Add($" {name.Trim()} {((isDefusing == 1) ? "Defusing" : "")}  ({PlayerStatus}) ${money}\n Weapon: {Weapons.GetName(gunId),-16} | Rank: {Ranks.GetName(rank)} | Wins: {wins}\n");
                 }
             }
             
@@ -204,10 +213,12 @@ namespace ChristWare
                 foreach (var component in components)
                 {
                     var currentHotkey = component.Hotkey.Value;
+                    
 
                     if (!pressedKey.HasValue
                         && foregroundWindow == csgoWindowHandle
                         && KeyUtility.IsKeyDown(currentHotkey)
+                        && KeyUtility.IsKeyDown(new HotKey(configuration.Value.ToggleHoldKey).Value) // only if ctrl is held
                         && (Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwMouseEnable) ^ (int)clientAddress + Signatures.dwMouseEnablePtr) != 0)
                     {
                         pressedKey = (short?)currentHotkey;

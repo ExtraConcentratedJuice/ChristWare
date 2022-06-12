@@ -94,6 +94,10 @@ namespace ChristWare.Core
                 case 5033: return "Moto Gloves";
                 case 5034: return "Specialist Gloves";
                 case 5035: return "Hydra Gloves";
+                case 262205: return "USP-S";
+                case 262145: return "Five-Seven";
+                case 262204: return "Silent M4";
+                case 589833: return "AWP";
                 default: return "Invalid";
             };
         }

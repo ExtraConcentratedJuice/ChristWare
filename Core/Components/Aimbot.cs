@@ -40,7 +40,7 @@ namespace ChristWare.Core.Components
                 var entity = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwEntityList + i * 0x10);
                 var enemyTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
 
-                if (enemyTeamId == teamId)
+                if (enemyTeamId == teamId) // need to fix for DZ
                     continue;
 
                 var enemyHealth = Memory.Read<int>(processHandle, entity + Netvars.m_iHealth);
@@ -63,7 +63,7 @@ namespace ChristWare.Core.Components
             return inFov;
         }
 
-        // Not entirely efficient, but I will rewrite it later.
+        // "Not entirely efficient, but I will rewrite it later." - ExtraConcentratedJuice 2019
         public void OnTick()
         {
             GlobalState.AimBotControllingRecoil = false;

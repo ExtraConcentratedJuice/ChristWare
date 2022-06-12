@@ -20,7 +20,7 @@ namespace ChristWare.Core.Components
         protected override void OnEnable()
         {
             var localPlayer = Memory.Read<int>(processHandle, (int)clientAddress + Signatures.dwLocalPlayer);
-            Memory.Write<int>(processHandle, localPlayer + Netvars.m_iObserverMode, 1);
+            Memory.Write<int>(processHandle, localPlayer + Netvars.m_iObserverMode, 5);
         }
 
         protected override void OnDisable()

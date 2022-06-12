@@ -29,7 +29,7 @@ namespace ChristWare.Core.Components
                 return;
 
             var entityTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
-
+            
             if (entityTeamId != teamId)
                 Memory.Write<int>(processHandle, entity + Netvars.m_bSpotted, 1);
         }

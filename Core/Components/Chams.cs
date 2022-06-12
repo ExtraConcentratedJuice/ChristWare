@@ -26,7 +26,10 @@ namespace ChristWare.Core.Components
             var entityTeamId = Memory.Read<int>(processHandle, entity + Netvars.m_iTeamNum);
 
             var color = entityTeamId != teamId ? configuration.Value.EnemyChamsColor : configuration.Value.FriendlyChamsColor;
-
+            //if (!configuration.Value.TeamESP && entityTeamId == teamId)
+            //{
+            //    return;
+            //}
             var entityRender = entity + Netvars.m_clrRender;
 
             Memory.Write<RGBColor>(processHandle, entityRender, color);

@@ -15,6 +15,16 @@ namespace ChristWare
     [Obfuscation(Exclude = false, Feature = "-rename")]
     public class ChristConfiguration
     {
+        [DefaultValue(false)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
+        [Obfuscation(Exclude = false, Feature = "-rename")]
+        public bool TeamESP { get; set; }
+
+        [DefaultValue("0x11")]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
+        [Obfuscation(Exclude = false, Feature = "-rename")]
+        public string ToggleHoldKey { get; set; }
+
         [DefaultValue("0x2D")]
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         [Obfuscation(Exclude = false, Feature = "-rename")]

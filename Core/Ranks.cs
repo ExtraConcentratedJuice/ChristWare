@@ -33,7 +33,7 @@ namespace ChristWare.Core
 
         public static string GetName(int index)
         {
-            if (index >= 0 && index < ranks.Length)
+            if (index >= 0 && index < 19)
                 return ranks[index];
 
             return "Invalid Rank";
