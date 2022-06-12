@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>ChristWare</RootNamespace>
     <AssemblyName>ChristWare</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -69,10 +69,10 @@
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
-    <ManifestCertificateThumbprint>AC3988D78365468BE2AB67A2AF03A1CF3A9B9F95</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>8B63545C72324B1F3EE81DAF880547B8A74CC7CE</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>ChristWare_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>ChristWare_4_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>false</GenerateManifests>
@@ -91,6 +91,12 @@
   <PropertyGroup>
     <ApplicationManifest>ChristWare.exe.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>niggerkey.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -101,6 +107,9 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
@@ -113,6 +122,7 @@
     <Compile Include="Core\ChristConfiguration.cs" />
     <Compile Include="Core\Component.cs" />
     <Compile Include="Core\Components\Aimbot.cs" />
+    <Compile Include="Core\Components\BombTimer.cs" />
     <Compile Include="Core\Components\ThirdPerson.cs" />
     <Compile Include="Core\Components\AntiFlash.cs" />
     <Compile Include="Core\Components\BunnyHop.cs" />
@@ -164,12 +174,21 @@
     <Compile Include="Utilities\WindowUtility.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="ChristWare.crproj">
       <SubType>Designer</SubType>
     </None>
     <None Include="ChristWare.exe.manifest" />
+    <None Include="ChristWare_1_TemporaryKey.pfx" />
+    <None Include="ChristWare_2_TemporaryKey.pfx" />
+    <None Include="ChristWare_3_TemporaryKey.pfx" />
+    <None Include="ChristWare_4_TemporaryKey.pfx" />
+    <None Include="christware_awhNigg67.pfx" />
     <None Include="ChristWare_TemporaryKey.pfx" />
+    <None Include="cumkey.snk" />
+    <None Include="niggerkey.pfx" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
